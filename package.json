@@ -6,7 +6,11 @@
     "type": "module",
     "scripts": {
         "start": "nodemon ./src/index.js",
+<<<<<<< HEAD
         "build": "node ./src/index.js",
+=======
+        "build": "npm install && node ./src/index.js",
+>>>>>>> 0095b0228e3a89a7d8d5220f4343954c675f18f2
         "test": "jest",
         "serve": "npm build && node dist/app.js"
     },
