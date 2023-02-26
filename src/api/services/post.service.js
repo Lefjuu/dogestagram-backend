@@ -6,10 +6,11 @@ import { v4 as uuidv4 } from 'uuid'
 import { deleteFile, uploadFile } from '../../lib/aws.lib.js'
 
 const getPosts = async () => {
-    let posts = await PostModel.find({})
+    let posts = await PostModel.find({}).sort({ createdAt: -1 })
 
     for await (let post of posts) {
-        const user = await UserModel.findById(post.author).lean()
+        const user = await UserModel.findById(post.author)
+        .lean()
         post['author'] = user.username
     }
 
