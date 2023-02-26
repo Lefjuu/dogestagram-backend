@@ -7,8 +7,8 @@ import { fileURLToPath } from 'url'
 import { dirname } from 'path'
 import express from 'express'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+// const __filename = fileURLToPath(import.meta.url)
+// const __dirname = dirname(__filename)
 
 export default async function routes(app) {
     fs.readdirSync(`${BASE_PATH}/api/routers`).forEach((route) => {
@@ -19,17 +19,17 @@ export default async function routes(app) {
         )
     })
 
-    app.use((req, res, next) => {
-        if (!req.url.startsWith('/api')) {
-            app.use(
-                express.static(path.join(__dirname, '../../build/index.html'))
-            )
-            app.get('*', (req, res) => {
-                res.sendFile(
-                    path.resolve(__dirname, '../../build', 'index.html')
-                )
-            })
-        }
-        next()
-    })
+    // app.use((req, res, next) => {
+    //     if (!req.url.startsWith('/api')) {
+    //         app.use(
+    //             express.static(path.join(__dirname, '../../build/index.html'))
+    //         )
+    //         app.get('*', (req, res) => {
+    //             res.sendFile(
+    //                 path.resolve(__dirname, '../../build', 'index.html')
+    //             )
+    //         })
+    //     }
+    //     next()
+    // })
 }

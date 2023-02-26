@@ -6,10 +6,12 @@ let redis
 const connect = () =>
     new Promise((resolve, reject) => {
         const r = new Redis(
-            REDIS_PASSWORD
-                ? `redis://:${REDIS_PASSWORD}@${REDIS_HOSTNAME}${REDIS_PORT}/0`
-                : `redis://${REDIS_HOSTNAME}:${REDIS_PORT}/0`
+            // REDIS_PASSWORD
+            // ? `redis://:${REDIS_PASSWORD}@${REDIS_HOSTNAME}${REDIS_PORT}/0`
+            // : `redis://${REDIS_HOSTNAME}:${REDIS_PORT}`
+            'rediss://red-cft8apqrrk0c8352qoag:p7UzzKXXXPWkfKZumYuN74m2ieQFHrc6@frankfurt-redis.render.com:6379'
         )
+        // console.log(`redis://${REDIS_HOSTNAME}:${REDIS_PORT}`)
 
         r.on('connect', function () {
             console.log('✅ Redis: connected!')
