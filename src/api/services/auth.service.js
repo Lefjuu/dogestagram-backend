@@ -9,9 +9,6 @@ const login = async (login, password) => {
         $or: [
             {
                 email: login
-            },
-            {
-                phone: login
             }
         ]
     })
@@ -52,9 +49,6 @@ const register = async (login, username, password, terms) => {
                 email: login
             },
             {
-                phone: login
-            },
-            {
                 username: username
             }
         ]
@@ -70,13 +64,7 @@ const register = async (login, username, password, terms) => {
         query.img =
             'https://dogestagram.s3.eu-west-2.amazonaws.com/3311f24b5f491d4b6d3745ec526506f7.png'
         query.username = username
-        if (login.includes('@')) {
-            query.email = login
-            query.phone = null
-        } else {
-            query.phone = login
-            query.email = null
-        }
+        query.email = login
         const user = await UserModel.create({
             ...query,
             password,
@@ -140,9 +128,6 @@ const recover = async (login) => {
         $or: [
             {
                 email: login
-            },
-            {
-                phone: login
             }
         ],
         deleted_at: null
@@ -164,7 +149,7 @@ const recover = async (login) => {
 
 const me = async (user_id) => {
     return await UserModel.findOne({ _id: user_id, deleted_at: null }).select(
-        'phone email name created_at username'
+        'email name created_at username'
     )
 }
 

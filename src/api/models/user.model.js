@@ -8,13 +8,6 @@ import bcrypt from 'bcrypt'
 // import "./methods/user.method.js"
 
 const UserSchema = new Schema({
-    phone: {
-        type: String,
-        trim: true,
-        unique: true,
-        sparse: true,
-        index: true
-    },
     email: {
         type: String,
         trim: true,
