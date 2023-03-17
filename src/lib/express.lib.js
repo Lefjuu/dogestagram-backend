@@ -17,48 +17,30 @@ const create = async (app) => {
     )
     app.use(bodyParser.urlencoded({ extended: true }))
 
-    // gzip compression
     app.use(compression())
-
-    app.use(methodOverride())
-
-    app.use(
-        rateLimit({
-            windowMs: 1 * 60 * 1000, // 1 minutes
-            max: 1000, // limit each ip to 1000 requests per windowMs
-            message: 'You have exceeded the  requests in 24 hrs limit!',
-            headers: true
-        })
-    )
-    app.use(cookieParser())
-
-    // app.use(
-    //     helmet.contentSecurityPolicy({
-    //         useDefaults: true,
-    //         directives: {
-    //             'img-src': ["'self'", 'https: data:']
-    //         }
-    //     })
-    // )
-
-    // app.use(cors())
-
     const corsOptions = {
         origin: CLIENT_HOSTNAME,
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
-        preflightContinue: false,
-        optionsSuccessStatus: 204,
-        allowedHeaders: ['Content-Type', 'Authorization']
-        // exposedHeaders: ['Content-Type', 'Authorization'],
-        // maxAge: 3600,
-        // // Add COEP and COOP headers
-        // allowedCrossDomain: true,
-        // crossOriginEmbedderPolicy: 'require-corp',
-        // crossOriginOpenerPolicy: 'same-origin'
+        optionsSuccessStatus: 204
     }
 
     app.use(cors(corsOptions))
+
+    app.use(methodOverride())
+
+    // app.use(
+    //     rateLimit({
+    //         windowMs: 1 * 60 * 1000, // 1 minutes
+    //         max: 1000, // limit each ip to 1000 requests per windowMs
+    //         message: 'You have exceeded the  requests in 1 minute limit!',
+    //         headers: true
+    //     })
+    // )
+    app.use(cookieParser())
+
+    app.use(helmet())
 
     if (PROJECT_MODE === 'development') app.use(morgan('dev'))
 }
