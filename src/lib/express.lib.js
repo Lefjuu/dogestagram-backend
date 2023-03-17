@@ -18,15 +18,6 @@ const create = async (app) => {
     app.use(bodyParser.urlencoded({ extended: true }))
 
     app.use(compression())
-    const corsOptions = {
-        origin: CLIENT_HOSTNAME,
-        methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-        credentials: true,
-        optionsSuccessStatus: 204
-    }
-
-    app.use(cors(corsOptions))
 
     app.use(methodOverride())
 
@@ -39,8 +30,19 @@ const create = async (app) => {
     //     })
     // )
     app.use(cookieParser())
-
     app.use(helmet())
+
+    const corsOptions = {
+        origin: `${CLIENT_HOSTNAME}`,
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        credentials: true,
+
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+        allowedHeaders: ['Content-Type', 'Authorization']
+    }
+
+    app.use(cors(corsOptions))
 
     if (PROJECT_MODE === 'development') app.use(morgan('dev'))
 }

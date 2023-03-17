@@ -1,5 +1,5 @@
 import Redis from 'ioredis'
-import { REDIS_HOSTNAME, REDIS_PORT, REDIS_PASSWORD } from '../config/index.js'
+import { REDIS_HOSTNAME } from '../config/index.js'
 
 let redis
 

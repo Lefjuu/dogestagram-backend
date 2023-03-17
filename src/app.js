@@ -7,8 +7,8 @@ import { connect as redis } from './lib/redis.lib.js'
 const app = express()
 
 const init = async () => {
-    // routes
-    await routes(app)
+    // express
+    await create(app)
 
     // redis
     await redis()
@@ -16,8 +16,8 @@ const init = async () => {
     // mongoose
     await mongoose()
 
-    // express
-    await create(app)
+    // routes
+    await routes(app)
 }
 
 export { init, app }
