@@ -30,7 +30,7 @@ const create = async (app) => {
     //     })
     // )
     app.use(cookieParser())
-    app.use(helmet())
+    // app.use(helmet())
 
     const corsOptions = {
         origin: `${CLIENT_HOSTNAME}`,

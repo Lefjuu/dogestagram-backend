@@ -5,7 +5,7 @@ import TokenModel from '../api/models/token.model.js'
 import { AUTH_EMAIL, AUTH_PASS, CLIENT_HOSTNAME } from '../config/index.js'
 
 const sendResetPasswordEmail = async (email) => {
-    const currentUrl = `${CLIENT_HOSTNAME}/new-password/`
+    const currentUrl = `${CLIENT_HOSTNAME}/newPassword/`
 
     function makeId(length) {
         let result = ''
