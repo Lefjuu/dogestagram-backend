@@ -41,7 +41,8 @@ export const AUTH_EMAIL = process.env.AUTH_EMAIL
 
 export const AUTH_PASS = process.env.AUTH_PASS
 
-// (seconds, by default trimester)
+export const CLIENT_HOSTNAME = process.env.CLIENT_HOSTNAME
+
 export const REDIS_TTL = {
     trimester: 7776000
 }
