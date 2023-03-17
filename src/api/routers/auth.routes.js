@@ -5,7 +5,7 @@ export default (app) => {
     app.post('/api/auth/login', AuthController.login)
     app.post('/api/auth/register', AuthController.register)
     app.post('/api/auth/recover', AuthController.recover)
-    app.post('/api/auth/forgotPassword', AuthController.sendEmail)
-    app.patch('/api/auth/newPassword/:string', AuthController.setNewPassword)
+    app.post('/api/auth/forgot-password', AuthController.sendEmail)
+    app.patch('/api/auth/new-password/:string', AuthController.setNewPassword)
     app.get('/api/auth/me', mw(['user']), AuthController.me)
 }
