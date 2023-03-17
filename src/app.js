@@ -9,7 +9,10 @@ const app = express()
 const init = async () => {
     // routes
     await routes(app)
+
+    // redis
     await redis()
+
     // mongoose
     await mongoose()
 

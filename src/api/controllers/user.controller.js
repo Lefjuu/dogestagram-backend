@@ -5,7 +5,6 @@ import CodeEnum from '../../utils/statusCodes.js'
 const getUser = async (req, res) => {
     try {
         const { username } = req.params
-        console.log(username)
         if (!username || validator.isEmpty(username)) {
             throw {
                 code: CodeEnum.ProvideValues,
