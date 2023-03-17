@@ -14,6 +14,12 @@ const getPosts = async (req, res) => {
 export const getPost = async (req, res) => {
     try {
         const { id } = req.params
+        if (!id || !validator.isMongoId(id)) {
+            throw {
+                code: CodeEnum.ProvideValues,
+                message: 'Id cannot be empty'
+            }
+        }
 
         const post = await PostService.getPost(id)
         res.status(200).json(post)
@@ -57,6 +63,13 @@ const deletePost = async (req, res) => {
     try {
         const { id } = req.params
 
+        if (!id || !validator.isMongoId(id)) {
+            throw {
+                code: CodeEnum.ProvideValues,
+                message: 'Id cannot be empty'
+            }
+        }
+
         await PostService.deletePost(id)
         res.sendStatus(204)
     } catch (err) {
@@ -78,7 +91,7 @@ const updatePost = async (req, res) => {
         if (!description || validator.isEmpty(description)) {
             throw {
                 code: CodeEnum.ProvideValues,
-                message: 'Post Id cannot be empty'
+                message: 'Description cannot be empty'
             }
         }
         const post = await PostService.updatePost(id, description)
@@ -94,6 +107,17 @@ const likePost = async (req, res) => {
         const { id } = req.params
         const { userId } = req.body
 
+        if (
+            !id ||
+            validator.isMongoId(id) ||
+            !userId ||
+            validator.isMongoId(userId)
+        ) {
+            throw {
+                code: CodeEnum.ProvideValues,
+                message: 'Post Id cannot be empty'
+            }
+        }
         await PostService.likePost(id, userId)
         res.sendStatus(201)
     } catch (err) {
@@ -105,6 +129,18 @@ const unlikePost = async (req, res) => {
     try {
         const { id } = req.params
         const { userId } = req.body
+
+        if (
+            !id ||
+            validator.isMongoId(id) ||
+            !userId ||
+            validator.isMongoId(userId)
+        ) {
+            throw {
+                code: CodeEnum.ProvideValues,
+                message: 'Post Id cannot be empty'
+            }
+        }
 
         await PostService.unlikePost(id, userId)
         res.sendStatus(204)
@@ -151,7 +187,16 @@ const getExploreUser = async (req, res) => {
 
 const getUserPosts = async (req, res) => {
     try {
-        const posts = await PostService.getUserPosts(req.params.id)
+        const { id } = req.params
+
+        if (!id || validator.isMongoId(id)) {
+            throw {
+                code: CodeEnum.ProvideValues,
+                message: 'Id cannot be empty'
+            }
+        }
+
+        const posts = await PostService.getUserPosts(id)
         res.status(200).json(posts)
     } catch (err) {
         res.status(500).json(err)
@@ -161,6 +206,13 @@ const getUserPosts = async (req, res) => {
 const likedPosts = async (req, res) => {
     try {
         const { id } = req.params
+
+        if (!id || validator.isMongoId(id)) {
+            throw {
+                code: CodeEnum.ProvideValues,
+                message: 'Id cannot be empty'
+            }
+        }
 
         const liked = await PostService.likedPosts(id)
         res.status(200).json(liked)

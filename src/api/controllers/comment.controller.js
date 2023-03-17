@@ -7,7 +7,7 @@ const createComment = async (req, res) => {
         const { id } = req.params
         const { username, description } = req.body
 
-        if (!id || validator.isEmpty(id)) {
+        if (!id || !validator.isMongoId(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Id cannot be empty'

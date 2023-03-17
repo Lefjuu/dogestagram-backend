@@ -28,7 +28,6 @@ export const uploadFile = async (file, author) => {
         ContentEncoding: 'base64',
         ContentType: `image/${type}`
     }
-    console.log(uploadParams)
 
     return await s3.upload(uploadParams).promise()
 }
@@ -36,14 +35,13 @@ export const uploadFile = async (file, author) => {
 export const deleteFile = async (file) => {
     try {
         file = file.split('/').slice(-1)[0]
-        console.log(file)
         const uploadParams = {
             Bucket: bucketName,
             Key: `${file}`
         }
         s3.deleteObject(uploadParams, function (err, data) {
-            if (err) console.log(err, err.stack)
-            else console.log(data)
+            // if (err) console.log(err, err.stack)
+            // else console.log(data)
         })
         return
     } catch (err) {

@@ -39,9 +39,9 @@ const followUser = async (req, res) => {
 
         if (
             !id ||
-            validator.isEmpty(id) ||
+            !validator.isMongoId(id) ||
             !userId ||
-            validator.isEmpty(userId)
+            !validator.isMongoId(userId)
         ) {
             throw {
                 code: CodeEnum.ProvideValues,
@@ -63,9 +63,9 @@ const unfollowUser = async (req, res) => {
 
         if (
             !id ||
-            validator.isEmpty(id) ||
+            !validator.isMongoId(id) ||
             !userId ||
-            validator.isEmpty(userId)
+            !validator.isMongoId(userId)
         ) {
             throw {
                 code: CodeEnum.ProvideValues,
@@ -85,6 +85,13 @@ const updateUser = async (req, res) => {
         const { id } = req.params
         const { body } = req
 
+        if (!id || !validator.isMongoId(id)) {
+            throw {
+                code: CodeEnum.ProvideValues,
+                message: 'Id cannot be empty'
+            }
+        }
+
         const updatedData = await UserService.updateUser(id, body)
         res.status(200).json(updatedData)
     } catch (err) {
@@ -95,6 +102,13 @@ const updateUser = async (req, res) => {
 const getUserFollowers = async (req, res) => {
     try {
         const { username } = req.params
+
+        if (!username || validator.isEmpty(username)) {
+            throw {
+                code: CodeEnum.ProvideValues,
+                message: 'Username cannot be empty'
+            }
+        }
 
         const usersArray = await UserService.getUserFollowers(username)
         res.status(200).json(usersArray)
@@ -107,6 +121,13 @@ const getUserFollowers = async (req, res) => {
 const getUserFollowings = async (req, res) => {
     try {
         const { username } = req.params
+
+        if (!username || validator.isEmpty(username)) {
+            throw {
+                code: CodeEnum.ProvideValues,
+                message: 'Username cannot be empty'
+            }
+        }
 
         const usersArray = await UserService.getUserFollowings(username)
         res.status(200).json(usersArray)

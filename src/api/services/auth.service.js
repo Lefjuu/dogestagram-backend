@@ -45,7 +45,6 @@ const login = async (login, password) => {
 }
 
 const register = async (login, username, password, terms) => {
-    console.log(login, username, password)
     const exists = await UserModel.exists({
         $or: [
             {
