@@ -194,9 +194,21 @@ const getExploreUser = async (id) => {
 }
 
 const getUserPosts = async (id) => {
-    return await PostModel.find({
+    let posts = await PostModel.find({
         author: id
     }).lean()
+
+    posts.sort((a, b) => {
+        if (!a.createdAt) {
+            return 1
+        }
+        if (!b.createdAt) {
+            return -1
+        }
+        return new Date(b.createdAt) - new Date(a.createdAt)
+    })
+
+    return posts
 }
 
 const likedPosts = async (id) => {
