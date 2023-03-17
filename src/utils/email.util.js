@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 import nodemailer from 'nodemailer'
 
 import TokenModel from '../api/models/token.model.js'
-import { AUTH_EMAIL, AUTH_PASS } from '../config/index.js'
+import { AUTH_EMAIL, AUTH_PASS, CLIENT_HOSTNAME } from '../config/index.js'
 
 const sendResetPasswordEmail = async (email) => {
     const currentUrl = `${CLIENT_HOSTNAME}/new-password/`
