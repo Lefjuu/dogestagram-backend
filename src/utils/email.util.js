@@ -23,15 +23,18 @@ const sendResetPasswordEmail = async (email) => {
     const uniqueString = makeId(200)
 
     const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
         service: 'gmail',
         auth: {
-            user: AUTH_EMAIL,
-            pass: AUTH_PASS
+            user: process.env.AUTH_EMAIL,
+            pass: process.env.AUTH_PASS
         }
     })
 
     const mailOptions = {
-        from: process.env.AUTH_EMAIL,
+        from: AUTH_EMAIL,
         to: email,
         subject: 'Reset your password',
         html: `<p>Someone (hopefully you) has requested a password reset for your dogestagram account. Follow the link below to set a new password:</p><p>This link <b>expires in 6 hours</b>.</p>
