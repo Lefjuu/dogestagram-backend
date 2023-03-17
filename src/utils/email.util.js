@@ -28,8 +28,8 @@ const sendResetPasswordEmail = async (email) => {
         secure: true,
         service: 'gmail',
         auth: {
-            user: process.env.AUTH_EMAIL,
-            pass: process.env.AUTH_PASS
+            user: AUTH_EMAIL,
+            pass: AUTH_PASS
         }
     })
 
