@@ -1,11 +1,6 @@
 import aggregatePaginate from 'mongoose-aggregate-paginate-v2'
-import AutoIncrement from 'mongoose-sequence'
-// import "./hooks/user.hook.js"
-import mongoose, { Schema, model } from 'mongoose'
+import mongoose, { Schema} from 'mongoose'
 import bcrypt from 'bcrypt'
-
-// import "./statics/user.static.js"
-// import "./methods/user.method.js"
 
 const UserSchema = new Schema({
     email: {

@@ -21,16 +21,16 @@ const create = async (app) => {
 
     app.use(methodOverride())
 
-    // app.use(
-    //     rateLimit({
-    //         windowMs: 1 * 60 * 1000, // 1 minutes
-    //         max: 1000, // limit each ip to 1000 requests per windowMs
-    //         message: 'You have exceeded the  requests in 1 minute limit!',
-    //         headers: true
-    //     })
-    // )
+    app.use(
+        rateLimit({
+            windowMs: 1 * 60 * 1000, // 1 minutes
+            max: 1000, // limit each ip to 1000 requests per windowMs
+            message: 'You have exceeded the  requests in 1 minute limit!',
+            headers: true
+        })
+    )
     app.use(cookieParser())
-    // app.use(helmet())
+    app.use(helmet())
 
     const corsOptions = {
         origin: `${CLIENT_HOSTNAME}`,

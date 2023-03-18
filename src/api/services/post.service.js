@@ -26,14 +26,12 @@ const getPost = async (id) => {
 }
 
 const createPost = async (body) => {
-    console.log(body)
     const file = body.img
     const FileId = uuidv4()
     const result = await uploadFile(file, FileId)
 
     const newPost = await PostModel.create({
         img: result.Location,
-        // img: 'https://dogestagram.s3.eu-west-2.amazonaws.com/ff7e3725-bcd9-4c5a-82cc-1fbded398a5a.png',
         author: body.author,
         description: body.description,
         likes: ['']

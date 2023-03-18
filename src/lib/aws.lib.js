@@ -2,7 +2,6 @@ import pkg from 'aws-sdk'
 const { S3 } = pkg
 import dotenv from 'dotenv'
 dotenv.config()
-import fs from 'fs'
 
 const bucketName = process.env.AWS_BUCKET_NAME
 const region = process.env.AWS_BUCKET_REGION
@@ -39,10 +38,7 @@ export const deleteFile = async (file) => {
             Bucket: bucketName,
             Key: `${file}`
         }
-        s3.deleteObject(uploadParams, function (err, data) {
-            // if (err) console.log(err, err.stack)
-            // else console.log(data)
-        })
+        s3.deleteObject(uploadParams)
         return
     } catch (err) {
         console.log(err)

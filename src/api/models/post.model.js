@@ -1,6 +1,4 @@
 import mongoose from 'mongoose'
-import AutoIncrement from 'mongoose-sequence'
-import aggregatePaginate from 'mongoose-aggregate-paginate-v2'
 
 const PostSchema = mongoose.Schema(
     {

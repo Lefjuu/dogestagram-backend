@@ -1,4 +1,3 @@
-// Models
 import { deleteFile, uploadFile } from '../../lib/aws.lib.js'
 import CodeEnum from '../../utils/statusCodes.js'
 import UserModel from '../models/user.model.js'
