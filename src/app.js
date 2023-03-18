@@ -10,8 +10,6 @@ const app = express()
 const init = async () => {
     // routes
     await routes(app)
-    // express
-    await create(app)
 
     // swagger
     await swagger(app)
@@ -21,6 +19,9 @@ const init = async () => {
 
     // mongoose
     await mongoose()
+
+    // express
+    await create(app)
 }
 
 export { init, app }
