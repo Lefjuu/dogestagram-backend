@@ -481,7 +481,7 @@ const getUserPosts = async (req, res) => {
     try {
         const { id } = req.params
 
-        if (!id || validator.isMongoId(id)) {
+        if (!id || !validator.isMongoId(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Id cannot be empty'
