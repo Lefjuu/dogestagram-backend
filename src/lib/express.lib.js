@@ -9,9 +9,10 @@ import { CLIENT_HOSTNAME, PROJECT_MODE } from '../config/index.js'
 import rateLimit from 'express-rate-limit'
 
 const create = async (app) => {
+    app.use(helmet())
     app.use(
         bodyParser.json({
-            limit: '25mb',
+            limit: '50mb',
             extended: true
         })
     )
@@ -30,7 +31,6 @@ const create = async (app) => {
         })
     )
     app.use(cookieParser())
-    app.use(helmet())
 
     const corsOptions = {
         origin: `${CLIENT_HOSTNAME}`,
