@@ -1,6 +1,6 @@
 ## Welcome to Social Media App
 
-Social Media App is a dynamic web application with which we can add our own photos, share with other users, interact with them in the comments section.
+Social Media App is a dynamic web application with which we can add our own photos, share with other users, interact with them in the comments section. The stack is made up of:
 
 - Node.js : Open source, cross-platform runtime environment for executing JavaScript code
 - Express.js : Back-end web application framework running on top of Node.js
