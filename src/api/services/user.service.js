@@ -1,4 +1,3 @@
-// Models
 import { deleteFile, uploadFile } from '../../lib/aws.lib.js'
 import CodeEnum from '../../utils/statusCodes.js'
 import UserModel from '../models/user.model.js'
@@ -8,7 +7,7 @@ const getUser = async (username) => {
     const user = await UserModel.findOne({
         username: username,
         deleted_at: null
-    })
+    }).lean()
     if (user) {
         if (user.deleted_at)
             throw {
@@ -103,15 +102,13 @@ const updateUser = async (id, body) => {
                 message: `User not found`
             }
         }
-        console.log(body)
         if (body.img) {
             deleteFile(res.img)
             const FileId = uuidv4()
-            // const result = await uploadFile(body.img, FileId)
-            // body.img = result.Location
+            const result = await uploadFile(body.img, FileId)
+            body.img = result.Location
         }
     })
-    console.log(body)
     const updatedData = await UserModel.findOneAndUpdate({ _id: id }, body, {
         new: true,
         runValidators: true

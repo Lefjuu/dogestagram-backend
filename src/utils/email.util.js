@@ -2,10 +2,10 @@ import { v4 as uuidv4 } from 'uuid'
 import nodemailer from 'nodemailer'
 
 import TokenModel from '../api/models/token.model.js'
-import { AUTH_EMAIL, AUTH_PASS } from '../config/index.js'
+import { AUTH_EMAIL, AUTH_PASS, CLIENT_HOSTNAME } from '../config/index.js'
 
-const sendResetPasswordEmail = async(email) => {
-    const currentUrl = 'http://localhost:3000/newPassword/'
+const sendResetPasswordEmail = async (email) => {
+    const currentUrl = `${CLIENT_HOSTNAME}/newPassword/`
 
     function makeId(length) {
         let result = ''
@@ -23,7 +23,9 @@ const sendResetPasswordEmail = async(email) => {
     const uniqueString = makeId(200)
 
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
         auth: {
             user: AUTH_EMAIL,
             pass: AUTH_PASS
@@ -31,10 +33,10 @@ const sendResetPasswordEmail = async(email) => {
     })
 
     const mailOptions = {
-        from: process.env.AUTH_EMAIL,
+        from: AUTH_EMAIL,
         to: email,
         subject: 'Reset your password',
-        html: `<p>Someone (hopefully you) has requested a password reset for your from-app account. Follow the link below to set a new password:</p><p>This link <b>expires in 6 hours</b>.</p>
+        html: `<p>Someone (hopefully you) has requested a password reset for your dogestagram account. Follow the link below to set a new password:</p><p>This link <b>expires in 6 hours</b>.</p>
         <p> Press <a href=${currentUrl + uniqueString}> here </a>`
     }
     const newId = uuidv4()
@@ -47,7 +49,7 @@ const sendResetPasswordEmail = async(email) => {
 
     await newToken.save()
 
-    transporter.sendMail(mailOptions, function(err, info) {
+    transporter.sendMail(mailOptions, function (err, info) {
         if (err) {
             console.log(err)
         } else {

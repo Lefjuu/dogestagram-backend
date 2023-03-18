@@ -1,15 +1,11 @@
 import Redis from 'ioredis'
-import { REDIS_HOSTNAME, REDIS_PORT, REDIS_PASSWORD } from '../config/index.js'
+import { REDIS_HOSTNAME } from '../config/index.js'
 
 let redis
 
 const connect = () =>
     new Promise((resolve, reject) => {
-        const r = new Redis(
-            REDIS_PASSWORD
-                ? `redis://:${REDIS_PASSWORD}@${REDIS_HOSTNAME}${REDIS_PORT}/0`
-                : `redis://${REDIS_HOSTNAME}:${REDIS_PORT}/0`
-        )
+        const r = new Redis(REDIS_HOSTNAME)
 
         r.on('connect', function () {
             console.log('✅ Redis: connected!')

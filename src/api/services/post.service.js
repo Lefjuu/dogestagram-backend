@@ -26,14 +26,12 @@ const getPost = async (id) => {
 }
 
 const createPost = async (body) => {
-    console.log(body)
     const file = body.img
     const FileId = uuidv4()
     const result = await uploadFile(file, FileId)
 
     const newPost = await PostModel.create({
         img: result.Location,
-        // img: 'https://dogestagram.s3.eu-west-2.amazonaws.com/ff7e3725-bcd9-4c5a-82cc-1fbded398a5a.png',
         author: body.author,
         description: body.description,
         likes: ['']
@@ -194,9 +192,21 @@ const getExploreUser = async (id) => {
 }
 
 const getUserPosts = async (id) => {
-    return await PostModel.find({
+    let posts = await PostModel.find({
         author: id
     }).lean()
+
+    posts.sort((a, b) => {
+        if (!a.createdAt) {
+            return 1
+        }
+        if (!b.createdAt) {
+            return -1
+        }
+        return new Date(b.createdAt) - new Date(a.createdAt)
+    })
+
+    return posts
 }
 
 const likedPosts = async (id) => {

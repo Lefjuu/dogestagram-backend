@@ -15,7 +15,7 @@ const db = async () => {
         mongoose.set('strictQuery', false)
 
         mongoose.connect(
-            MONGODB_USERNAME && MONGODB_PASSWORD // ? `mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOSTNAME}${PORT}/${MONGODB_DATABASE}`
+            MONGODB_USERNAME && MONGODB_PASSWORD
                 ? `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOSTNAME}/${MONGODB_DATABASE}?retryWrites=true&w=majority`
                 : `mongodb://${MONGODB_HOSTNAME}${PORT}/${MONGODB_DATABASE}`,
             {

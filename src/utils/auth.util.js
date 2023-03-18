@@ -7,7 +7,6 @@ export const session = async (id, data) => {
     try {
         const key = `${id}:${hash(8)}`
         const token = await sign({ key, ...data })
-        console.log(token)
         if (token) {
             await redis.set(
                 key,

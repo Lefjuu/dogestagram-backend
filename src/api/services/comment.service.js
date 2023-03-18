@@ -1,9 +1,7 @@
 // Models
 import { hash } from '../../utils/auth.util.js'
-import CodeEnum from '../../utils/statusCodes.js'
 import CommentModel from '../models/comment.model.js'
 import PostModel from '../models/post.model.js'
-import UserModel from '../models/user.model.js'
 
 const getComments = async (id) => {
     const post = await PostModel.findById(id).populate('comments').lean()
