@@ -268,9 +268,9 @@ const likePost = async (req, res) => {
 
         if (
             !id ||
-            validator.isMongoId(id) ||
+            !validator.isMongoId(id) ||
             !userId ||
-            validator.isMongoId(userId)
+            !validator.isMongoId(userId)
         ) {
             throw {
                 code: CodeEnum.ProvideValues,
@@ -327,9 +327,9 @@ const unlikePost = async (req, res) => {
 
         if (
             !id ||
-            validator.isMongoId(id) ||
+            !validator.isMongoId(id) ||
             !userId ||
-            validator.isMongoId(userId)
+            !validator.isMongoId(userId)
         ) {
             throw {
                 code: CodeEnum.ProvideValues,
@@ -530,7 +530,7 @@ const likedPosts = async (req, res) => {
     try {
         const { id } = req.params
 
-        if (!id || validator.isMongoId(id)) {
+        if (!id || !validator.isMongoId(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Id cannot be empty'
