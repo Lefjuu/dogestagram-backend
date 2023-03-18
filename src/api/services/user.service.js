@@ -8,7 +8,7 @@ const getUser = async (username) => {
     const user = await UserModel.findOne({
         username: username,
         deleted_at: null
-    })
+    }).lean()
     if (user) {
         if (user.deleted_at)
             throw {

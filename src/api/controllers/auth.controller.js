@@ -35,14 +35,52 @@ const login = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: User authentication
+ * components:
+ *   schemas:
+ *     Login:
+ *       type: object
+ *       properties:
+ *         login:
+ *           type: string
+ *           description: User's username or email
+ *         password:
+ *           type: string
+ *           format: password
+ *           description: User's password
+ * /auth/login:
+ *   post:
+ *     summary: Log in a user
+ *     description: Authenticate a user by checking their Credentials and return a JSON web token for accessing protected routes.
+ *     tags: [Auth]
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Login'
+ *     responses:
+ *       200:
+ *         description: Successfully logged in a user and returned a JSON web token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserToken'
+ *       500:
+ *         description: Server error occurred
+ */
+
 const register = async (req, res) => {
     try {
-        const { login, username, password } = req.body
+        const { email, username, password } = req.body
 
-        if (!login || validator.isEmpty(login)) {
+        if (!email || validator.isEmpty(email)) {
             throw {
                 code: CodeEnum.ProvideValues,
-                message: 'The login cannot be empty'
+                message: 'The email cannot be empty'
             }
         }
 
@@ -60,7 +98,7 @@ const register = async (req, res) => {
             }
         }
 
-        const data = await AuthService.register(login, username, password)
+        const data = await AuthService.register(email, username, password)
         let created = '_id' in data || 'n' in data
         return res.status(201).json(created)
     } catch (err) {
@@ -69,23 +107,43 @@ const register = async (req, res) => {
     }
 }
 
-const recover = async (req, res) => {
-    try {
-        const { login } = req.body
-
-        if (!login || validator.isEmpty(login)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'The login cannot be empty'
-            }
-        }
-
-        const data = await AuthService.recover(login)
-        return res.status(201).json(data)
-    } catch (err) {
-        res.status(500).json(err)
-    }
-}
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: User registration
+ * components:
+ *   schemas:
+ *     loginCredentials:
+ *       type: object
+ *       properties:
+ *         username:
+ *           type: string
+ *           description: User's unique username
+ *         password:
+ *           type: string
+ *           format: password
+ *           description: User's password
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: User's email address
+ * /auth/register:
+ *   post:
+ *     summary: Create a new user account
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/loginCredentials'
+ *     responses:
+ *       201:
+ *         description: User account created
+ *       500:
+ *         description: Server error occurred while processing the request
+ */
 
 const me = async (req, res) => {
     try {
@@ -116,6 +174,27 @@ const me = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Get current user data
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       '200':
+ *         description: Successful response with user data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       '401':
+ *         description: Unauthorized access
+ *       '500':
+ *         description: Internal server error
+ */
+
 const sendEmail = async (req, res) => {
     try {
         const { email } = req.body
@@ -133,6 +212,47 @@ const sendEmail = async (req, res) => {
         res.status(500).json(err)
     }
 }
+
+/**
+ * @swagger
+ * /auth/forgotPassword:
+ *   post:
+ *     summary: Send an email to reset password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: The email address of the user
+ *             required:
+ *               - email
+ *     responses:
+ *       '200':
+ *         description: Email sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               example: "email sended"
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: string
+ *                   description: The error code
+ *                 message:
+ *                   type: string
+ *                   description: The error message
+ */
 
 const setNewPassword = async (req, res) => {
     try {
@@ -164,11 +284,46 @@ const setNewPassword = async (req, res) => {
     }
 }
 
+/**
+ * @swagger
+ * /auth/newPassword/:string:
+ *   patch:
+ *     summary: Set a new password for the user
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: string
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: String to identify the user who is changing the password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 description: The user's new password
+ *               repeatedPassword:
+ *                 type: string
+ *                 description: The user's new password repeated
+ *             required:
+ *               - password
+ *               - repeatedPassword
+ *     responses:
+ *       '202':
+ *         description: The password was changed successfully
+ *       '500':
+ *         description: Internal server error
+ */
+
 export default {
     login,
     register,
     sendEmail,
     setNewPassword,
-    recover,
     me
 }

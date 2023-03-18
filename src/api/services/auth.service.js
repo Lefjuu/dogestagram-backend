@@ -11,7 +11,7 @@ const login = async (login, password) => {
                 email: login
             },
             {
-                phone: login
+                username: login
             }
         ]
     })
@@ -44,14 +44,11 @@ const login = async (login, password) => {
     }
 }
 
-const register = async (login, username, password, terms) => {
+const register = async (email, username, password) => {
     const exists = await UserModel.exists({
         $or: [
             {
-                email: login
-            },
-            {
-                phone: login
+                email: email
             },
             {
                 username: username
@@ -61,25 +58,18 @@ const register = async (login, username, password, terms) => {
     if (exists) {
         throw {
             code: CodeEnum.AlreadyExist,
-            message: `${login} is already registered`,
-            params: { login }
+            message: `${email} or ${username} is already registered`,
+            params: { email }
         }
     } else {
         const query = {}
         query.img =
             'https://dogestagram.s3.eu-west-2.amazonaws.com/3311f24b5f491d4b6d3745ec526506f7.png'
         query.username = username
-        if (login.includes('@')) {
-            query.email = login
-            query.phone = null
-        } else {
-            query.phone = login
-            query.email = null
-        }
+        query.email = email
         const user = await UserModel.create({
             ...query,
-            password,
-            check_terms: terms
+            password
         })
         return user
     }
@@ -134,37 +124,8 @@ const setNewPassword = async (string, password) => {
         })
 }
 
-const recover = async (login) => {
-    const user = await UserModel.findOne({
-        $or: [
-            {
-                email: login
-            },
-            {
-                phone: login
-            }
-        ],
-        deleted_at: null
-    }).lean()
-
-    if (user) {
-        await UserModel.updateOne({ _id: user._id })
-
-        return {
-            sent: `Sent code to ${login}`
-        }
-    } else {
-        throw {
-            code: CodeEnum.UserNotFound,
-            message: `${login} is not registered`
-        }
-    }
-}
-
 const me = async (user_id) => {
-    return await UserModel.findOne({ _id: user_id, deleted_at: null }).select(
-        'phone email name created_at username'
-    )
+    return await UserModel.findOne({ _id: user_id, deleted_at: null })
 }
 
 export default {
@@ -172,6 +133,5 @@ export default {
     register,
     sendEmail,
     setNewPassword,
-    recover,
     me
 }

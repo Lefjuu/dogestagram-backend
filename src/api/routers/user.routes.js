@@ -2,7 +2,7 @@ import UserController from '../controllers/user.controller.js'
 import { mw } from '../../services/mw.service.js'
 
 export default (app) => {
-    app.get('/api/profile/:username', mw(['user']), UserController.getUser)
+    app.get('/api/user/:username', mw(['user']), UserController.getUser)
     app.post('/api/user/follow/:id', mw(['user']), UserController.followUser)
     app.patch(
         '/api/user/unfollow/:id',
