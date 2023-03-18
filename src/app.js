@@ -8,6 +8,8 @@ import swagger from './lib/swagger.lib.js'
 const app = express()
 
 const init = async () => {
+    // routes
+    await routes(app)
     // express
     await create(app)
 
@@ -19,9 +21,6 @@ const init = async () => {
 
     // mongoose
     await mongoose()
-
-    // routes
-    await routes(app)
 }
 
 export { init, app }
