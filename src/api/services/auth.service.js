@@ -64,7 +64,7 @@ const register = async (email, username, password) => {
     } else {
         const query = {}
         query.img =
-            'https://dogestagram.s3.eu-west-2.amazonaws.com/3311f24b5f491d4b6d3745ec526506f7.png'
+            'https://dogestagram.s3.eu-west-2.amazonaws.com/white-user-member-guest-icon-png-image-31634946729lnhivlto5f.png'
         query.username = username
         query.email = email
         const user = await UserModel.create({
