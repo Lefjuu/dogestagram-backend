@@ -166,7 +166,7 @@ const getTimelineUser = async (id) => {
             $in: user.followings
         }
     })
-        .sort({ createdAt: 1 })
+        .sort({ createdAt: -1 })
         .lean()
     for await (let post of posts) {
         const user = await UserModel.findById(post.author).lean()
@@ -184,7 +184,7 @@ const getExploreUser = async (id) => {
             $ne: user._id
         }
     })
-        .sort({ createdAt: 1 })
+        .sort({ createdAt: -1 })
         .lean()
     for await (let post of posts) {
         const user = await UserModel.findById(post.author).lean()
