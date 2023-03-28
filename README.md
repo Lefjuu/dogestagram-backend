@@ -10,7 +10,7 @@ Social Media App is a dynamic web application with which we can add our own phot
 - Redis: Open source, in-memory, NoSQL data store used primarily as an application cache or quick-response database.
 - MongoDB : Document database – used by your back-end application to store its data as JSON (JavaScript Object Notation) documents
 
-### Documentation
+### Documentation (swagger.io)
 - [API DOCS](https://dogestagram-bn.onrender.com/api-docs/) - All routes and schemas needed for queries (the page loads in about 30 seconds )
 
 ### Installation
