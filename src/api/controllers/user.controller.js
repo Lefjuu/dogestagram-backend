@@ -1,18 +1,20 @@
-import validator from 'validator'
-import UserService from '../services/user.service.js'
-import CodeEnum from '../../utils/statusCodes.js'
+/* eslint-disable no-unused-vars */
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
+const validator = require('validator');
+const UserService = require('../services/user.service.js');
+const CodeEnum = require('../../utils/statusCodes.js');
 
-const getUser = async (req, res) => {
+exports.getUser = async (req, res) => {
     try {
-        const { username } = req.params
+        const { username } = req.params;
         if (!username || validator.isEmpty(username)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'The username cannot be empty'
-            }
+            };
         }
 
-        const user = await UserService.getUser(username)
+        const user = await UserService.getUser(username);
         if (user) {
             const {
                 lastLogin,
@@ -23,15 +25,14 @@ const getUser = async (req, res) => {
                 permissions,
                 liked,
                 ...thisUser
-            } = user
-            return res.status(200).json({ ...thisUser })
-        } else {
-            return res.sendStatus(401)
+            } = user;
+            return res.status(200).json({ ...thisUser });
         }
+        return res.sendStatus(401);
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -64,10 +65,10 @@ const getUser = async (req, res) => {
  *         description: Internal server error
  */
 
-const followUser = async (req, res) => {
+exports.followUser = async (req, res) => {
     try {
-        const { id } = req.params
-        const { userId } = req.body
+        const { id } = req.params;
+        const { userId } = req.body;
 
         if (
             !id ||
@@ -78,15 +79,14 @@ const followUser = async (req, res) => {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Both of id cannot be empty'
-            }
+            };
         }
-        await UserService.followUser(id, userId)
-        return res.sendStatus(202)
+        await UserService.followUser(id, userId);
+        return res.sendStatus(202);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 /**
  * @swagger
  * /user/follow/:id:
@@ -118,10 +118,10 @@ const followUser = async (req, res) => {
  *        description: Internal Server Error
  */
 
-const unfollowUser = async (req, res) => {
+exports.unfollowUser = async (req, res) => {
     try {
-        const { id } = req.params
-        const { userId } = req.body
+        const { id } = req.params;
+        const { userId } = req.body;
 
         if (
             !id ||
@@ -132,15 +132,14 @@ const unfollowUser = async (req, res) => {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Both of id cannot be empty'
-            }
+            };
         }
-        await UserService.unfollowUser(id, userId)
-        return res.sendStatus(202)
+        await UserService.unfollowUser(id, userId);
+        return res.sendStatus(202);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 /**
  * @swagger
  * /user/unfollow/:id:
@@ -172,25 +171,24 @@ const unfollowUser = async (req, res) => {
  *          description: Internal Server Error
  */
 
-const updateUser = async (req, res) => {
+exports.updateUser = async (req, res) => {
     try {
-        const { id } = req.params
-        const { body } = req
+        const { id } = req.params;
+        const { body } = req;
 
         if (!id || !validator.isMongoId(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Id cannot be empty'
-            }
+            };
         }
 
-        const updatedData = await UserService.updateUser(id, body)
-        res.status(200).json(updatedData)
+        const updatedData = await UserService.updateUser(id, body);
+        res.status(200).json(updatedData);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -238,24 +236,23 @@ const updateUser = async (req, res) => {
  *         description: Internal server error
  */
 
-const getUserFollowers = async (req, res) => {
+exports.getUserFollowers = async (req, res) => {
     try {
-        const { username } = req.params
+        const { username } = req.params;
 
         if (!username || validator.isEmpty(username)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Username cannot be empty'
-            }
+            };
         }
 
-        const usersArray = await UserService.getUserFollowers(username)
-        res.status(200).json(usersArray)
+        const usersArray = await UserService.getUserFollowers(username);
+        res.status(200).json(usersArray);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -287,24 +284,23 @@ const getUserFollowers = async (req, res) => {
  *         description: Internal server error
  */
 
-const getUserFollowings = async (req, res) => {
+exports.getUserFollowings = async (req, res) => {
     try {
-        const { username } = req.params
+        const { username } = req.params;
 
         if (!username || validator.isEmpty(username)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Username cannot be empty'
-            }
+            };
         }
 
-        const usersArray = await UserService.getUserFollowings(username)
-        res.status(200).json(usersArray)
+        const usersArray = await UserService.getUserFollowings(username);
+        res.status(200).json(usersArray);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -335,12 +331,3 @@ const getUserFollowings = async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-
-export default {
-    getUser,
-    followUser,
-    unfollowUser,
-    updateUser,
-    getUserFollowers,
-    getUserFollowings
-}

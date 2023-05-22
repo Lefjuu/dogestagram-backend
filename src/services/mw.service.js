@@ -1,38 +1,39 @@
-import validator from 'validator'
-import { check, renew } from '../utils/auth.util.js'
-import { error } from '../utils/helper.util.js'
+const validator = require('validator');
+const { check, renew } = require('../utils/auth.util.js');
+const { error } = require('../utils/helper.util.js');
 
-export const mw = (required) => {
+exports.mw = required => {
     return async (req, res, next) => {
         try {
-            let token = req.headers['authorization']
+            let token = req.headers.authorization;
             if (token) {
                 try {
-                    token = token.split(' ')[1]
-                    if (!validator.isJWT(token)) throw 'Token is not valid'
-                    req.headers.authorization = `Bearer ${token}`
-                    const decoded = await check(token)
+                    token = token.split(' ')[1];
+                    if (!validator.isJWT(token)) throw 'Token is not valid';
+                    req.headers.authorization = `Bearer ${token}`;
+                    const decoded = await check(token);
                     if (required) {
                         if ('permissions' in decoded) {
-                            const isAuthorized = required.filter((x) =>
+                            const isAuthorized = required.filter(x =>
                                 decoded.permissions.includes(x)
-                            )
-                            if (isAuthorized.length === 0) return forbidden(res)
+                            );
+                            if (isAuthorized.length === 0)
+                                return forbidden(res);
                         }
                     }
-                    await renew(decoded.key)
-                    req.user = decoded
+                    await renew(decoded.key);
+                    req.user = decoded;
 
-                    return next()
+                    return next();
                 } catch (errSession) {
-                    console.log(errSession)
-                    return res.sendStatus(401)
+                    console.log(errSession);
+                    return res.sendStatus(401);
                 }
             } else {
-                return res.status(401).json({ msg: 'Token not found' })
+                return res.status(401).json({ msg: 'Token not found' });
             }
         } catch (err) {
-            return error(res, err)
+            return error(res, err);
         }
-    }
-}
+    };
+};

@@ -1,10 +1,9 @@
-// Models
-import sendResetPasswordEmail from '../../utils/email.util.js'
-import CodeEnum from '../../utils/statusCodes.js'
-import TokenModel from '../models/token.model.js'
-import UserModel from '../models/user.model.js'
+const sendResetPasswordEmail = require('../../utils/email.util.js');
+const CodeEnum = require('../../utils/statusCodes.js');
+const TokenModel = require('../models/token.model.js');
+const UserModel = require('../models/user.model.js');
 
-const login = async (login, password) => {
+exports.login = async (login, password) => {
     const user = await UserModel.findOne({
         $or: [
             {
@@ -16,35 +15,34 @@ const login = async (login, password) => {
         ]
     })
         .select('+password')
-        .lean()
+        .lean();
 
     if (user) {
         if (user.deleted_at)
             throw {
                 code: CodeEnum.UserBanned,
                 message: `The user has been banned`
-            }
+            };
         if (!user.password)
             throw {
                 code: CodeEnum.ProvidePassword,
-                message: `Don't have a password, try in recover password`
-            }
-        const isMatch = await UserModel.compare(password, user.password)
+                message: `Don't have a password, try to recover password`
+            };
+        const isMatch = await UserModel.compare(password, user.password);
         if (!isMatch)
             throw {
                 code: CodeEnum.WrongPassword,
                 message: `Incorrect password`
-            }
-        return user
-    } else {
-        throw {
-            code: CodeEnum.UserNotFound,
-            message: `User not found`
-        }
+            };
+        return user;
     }
-}
+    throw {
+        code: CodeEnum.UserNotFound,
+        message: `User not found`
+    };
+};
 
-const register = async (email, username, password) => {
+exports.register = async (email, username, password) => {
     const exists = await UserModel.exists({
         $or: [
             {
@@ -54,60 +52,59 @@ const register = async (email, username, password) => {
                 username: username
             }
         ]
-    })
+    });
     if (exists) {
         throw {
             code: CodeEnum.AlreadyExist,
             message: `${email} or ${username} is already registered`,
             params: { email }
-        }
+        };
     } else {
-        const query = {}
+        const query = {};
         query.img =
-            'https://dogestagram.s3.eu-west-2.amazonaws.com/white-user-member-guest-icon-png-image-31634946729lnhivlto5f.png'
-        query.username = username
-        query.email = email
+            'https://dogestagram.s3.eu-west-2.amazonaws.com/white-user-member-guest-icon-png-image-31634946729lnhivlto5f.png';
+        query.username = username;
+        query.email = email;
         const user = await UserModel.create({
             ...query,
             password
-        })
-        return user
+        });
+        return user;
     }
-}
+};
 
-const sendEmail = async (email) => {
+exports.sendEmail = async email => {
     await UserModel.findOne({ email })
         .lean()
-        .then((res) => {
+        .then(res => {
             if (res === null) {
                 throw {
                     code: CodeEnum.UserNotFound,
-                    message: `User with email : ${email} doesn't exist`
-                }
+                    message: `User with email: ${email} doesn't exist`
+                };
             }
-        })
+        });
 
-    await sendResetPasswordEmail(email)
-    return
-}
+    await sendResetPasswordEmail(email);
+};
 
-const setNewPassword = async (string, password) => {
+exports.setNewPassword = async (string, password) => {
     await TokenModel.findOne({
         token: string
     })
         .lean()
-        .then(async (res) => {
+        .then(async res => {
             if (res === null) {
                 throw {
                     code: CodeEnum.TokenExpired,
                     message: `Token expired`
-                }
+                };
             }
             if (res.token !== string) {
                 throw {
                     code: CodeEnum.RequestTimeout,
                     message: `Token expired 2`
-                }
+                };
             }
             await UserModel.findOneAndUpdate(
                 {
@@ -116,22 +113,13 @@ const setNewPassword = async (string, password) => {
                 {
                     password: password
                 }
-            ).lean()
+            ).lean();
             await TokenModel.findOneAndDelete({
                 _id: res._id
-            }).lean()
-            return
-        })
-}
+            }).lean();
+        });
+};
 
-const me = async (user_id) => {
-    return await UserModel.findOne({ _id: user_id, deleted_at: null })
-}
-
-export default {
-    login,
-    register,
-    sendEmail,
-    setNewPassword,
-    me
-}
+exports.me = async userId => {
+    return await UserModel.findOne({ _id: userId, deleted_at: null });
+};

@@ -1,12 +1,14 @@
-import swaggerUi from 'swagger-ui-express'
-import swaggerJsdoc from 'swagger-jsdoc'
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-unpublished-require
+const swaggerUi = require('swagger-ui-express');
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-unpublished-require
+const swaggerJsdoc = require('swagger-jsdoc');
 
-const swagger = async (app) => {
+const swagger = async app => {
     const options = {
         definition: {
             openapi: '3.0.0',
             info: {
-                title: ' Dogestagram API with Swagger',
+                title: 'Dogestagram API with Swagger',
                 version: '0.1.0',
                 description:
                     'Dogestagram made with Express, Redis and documented with Swagger',
@@ -27,10 +29,10 @@ const swagger = async (app) => {
             './src/api/controllers/*.js',
             './src/api/models/*.js'
         ]
-    }
+    };
 
-    const specs = swaggerJsdoc(options)
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
-}
+    const specs = swaggerJsdoc(options);
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+};
 
-export default swagger
+module.exports = swagger;

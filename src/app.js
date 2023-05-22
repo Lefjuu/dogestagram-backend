@@ -1,27 +1,27 @@
-import mongoose from './lib/mongoose.lib.js'
-import { create } from './lib/express.lib.js'
-import express from 'express'
-import routes from './services/router.service.js'
-import { connect as redis } from './lib/redis.lib.js'
-import swagger from './lib/swagger.lib.js'
+const express = require('express');
+const { create } = require('./lib/express.lib.js');
+const { routes } = require('./services/router.service.js');
+const { connect: redis } = require('./lib/redis.lib.js');
+const swagger = require('./lib/swagger.lib.js');
+const mongoose = require('./lib/mongoose.lib.js');
 
-const app = express()
+const app = express();
 
 const init = async () => {
     // express
-    await create(app)
+    await create(app);
 
     // swagger
-    await swagger(app)
+    await swagger(app);
 
     // redis
-    await redis()
+    await redis();
 
     // mongoose
-    await mongoose()
+    await mongoose();
 
     // routes
-    await routes(app)
-}
+    await routes(app);
+};
 
-export { init, app }
+module.exports = { init, app };

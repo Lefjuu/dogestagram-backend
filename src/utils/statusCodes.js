@@ -1,4 +1,4 @@
-const CodeEnum = {
+exports.CodeEnum = {
     Continue: 100,
     SwitchingProtocols: 101,
     Processing: 102,
@@ -46,12 +46,9 @@ const CodeEnum = {
     WrongPassword: 858,
     UserNotExist: 859,
     PasswordsNotIdentical: 860,
-    RequestTimeout: 861,
     TokenExpired: 862,
     UserBanned: 863,
     ProvidePassword: 864,
     AlreadyFollowed: 865,
     NotFollowed: 866
-}
-
-export default CodeEnum
+};

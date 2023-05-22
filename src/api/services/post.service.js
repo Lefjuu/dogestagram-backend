@@ -1,34 +1,39 @@
-// Models
-import CodeEnum from '../../utils/statusCodes.js'
-import UserModel from '../models/user.model.js'
-import PostModel from '../models/post.model.js'
-import { v4 as uuidv4 } from 'uuid'
-import { deleteFile, uploadFile } from '../../lib/aws.lib.js'
+const { v4: uuidv4 } = require('uuid');
+const UserModel = require('../models/user.model.js');
+const PostModel = require('../models/post.model.js');
+const { deleteFile, uploadFile } = require('../../lib/aws.lib.js');
+const CodeEnum = require('../../utils/statusCodes.js');
 
-const getPosts = async () => {
-    let posts = await PostModel.find({})
+exports.getPosts = async () => {
+    const posts = await PostModel.find({});
 
-    for await (let post of posts) {
-        const user = await UserModel.findById(post.author).lean()
-        post['author'] = user.username
-    }
+    // for await (const post of posts) {
+    //         const user = await UserModel.findById(post.author).lean();
+    //         post.author = user.username;
+    //     }
+    await Promise.all(
+        posts.map(async post => {
+            const user = await UserModel.findById(post.author).lean();
+            post.author = user.username;
+        })
+    );
 
-    return posts
-}
+    return posts;
+};
 
-const getPost = async (id) => {
-    let post = await PostModel.findById(id).lean()
+exports.getPost = async id => {
+    const post = await PostModel.findById(id).lean();
 
-    const user = await UserModel.findById(post.author).lean()
-    post['author'] = user.username
-    post['authorImg'] = user.img
-    return post
-}
+    const user = await UserModel.findById(post.author).lean();
+    post.author = user.username;
+    post.authorImg = user.img;
+    return post;
+};
 
-const createPost = async (body) => {
-    const file = body.img
-    const FileId = uuidv4()
-    const result = await uploadFile(file, FileId)
+exports.createPost = async body => {
+    const file = body.img;
+    const FileId = uuidv4();
+    const result = await uploadFile(file, FileId);
 
     const newPost = await PostModel.create({
         img: result.Location,
@@ -36,29 +41,28 @@ const createPost = async (body) => {
         description: body.description,
         likes: ['']
         // comments: ['']
-    })
-    return newPost
-}
+    });
+    return newPost;
+};
 
-const deletePost = async (id) => {
+exports.deletePost = async id => {
     const post = await PostModel.findOne({
         _id: id
-    }).lean()
+    }).lean();
     if (post === null) {
         throw {
             code: CodeEnum.PostNotExist,
             message: `post not exist`
-        }
+        };
     }
     await PostModel.findOneAndDelete({
         _id: id
-    }).lean()
+    }).lean();
 
-    deleteFile(post.img)
-    return
-}
+    deleteFile(post.img);
+};
 
-const updatePost = async (id, description) => {
+exports.updatePost = async (id, description) => {
     const post = await PostModel.findByIdAndUpdate(
         {
             _id: id
@@ -66,19 +70,19 @@ const updatePost = async (id, description) => {
         {
             description: description
         }
-    )
+    );
 
     if (post === null) {
         throw {
             code: CodeEnum.PostNotExist,
             message: `Post not exist`
-        }
+        };
     }
 
-    return post
-}
+    return post;
+};
 
-const likePost = async (id, userId) => {
+exports.likePost = async (id, userId) => {
     await PostModel.findByIdAndUpdate(
         {
             _id: id
@@ -88,14 +92,14 @@ const likePost = async (id, userId) => {
                 likes: userId
             }
         }
-    ).then((res) => {
+    ).then(res => {
         if (res === null) {
             throw {
                 code: CodeEnum.PostNotExist,
                 message: `Post not exist`
-            }
+            };
         }
-    })
+    });
 
     await UserModel.findByIdAndUpdate(
         {
@@ -106,18 +110,17 @@ const likePost = async (id, userId) => {
                 liked: id
             }
         }
-    ).then((res) => {
+    ).then(res => {
         if (res === null) {
             throw {
                 code: CodeEnum.PostNotExist,
                 message: `User not exist`
-            }
+            };
         }
-    })
-    return
-}
+    });
+};
 
-const unlikePost = async (id, userId) => {
+exports.unlikePost = async (id, userId) => {
     await PostModel.findByIdAndUpdate(
         {
             _id: id
@@ -127,14 +130,14 @@ const unlikePost = async (id, userId) => {
                 likes: userId
             }
         }
-    ).then((res) => {
+    ).then(res => {
         if (res === null) {
             throw {
                 code: CodeEnum.PostNotExist,
                 message: `User not exist`
-            }
+            };
         }
-    })
+    });
     await UserModel.findByIdAndUpdate(
         {
             _id: userId
@@ -144,99 +147,106 @@ const unlikePost = async (id, userId) => {
                 liked: id
             }
         }
-    ).then((res) => {
+    ).then(res => {
         if (res === null) {
             throw {
                 code: CodeEnum.PostNotExist,
                 message: `User not exist`
-            }
+            };
         }
-    })
-    return
-}
+    });
+};
 
-const getTimelineUser = async (id) => {
-    const user = await UserModel.findById({ _id: id })
+exports.getTimelineUser = async id => {
+    const user = await UserModel.findById({ _id: id });
     if (user.followings === null) {
-        return null
+        return null;
     }
-    await user.followings.pull(user._id)
-    let posts = await PostModel.find({
+    await user.followings.pull(user._id);
+    const posts = await PostModel.find({
         author: {
             $in: user.followings
         }
     })
         .sort({ createdAt: -1 })
-        .lean()
-    for await (let post of posts) {
-        const user = await UserModel.findById(post.author).lean()
-        post['author'] = user.username
-    }
+        .lean();
 
-    return posts
-}
+    await Promise.all(
+        posts.map(async post => {
+            const currentUser = await UserModel.findById(post.author).lean();
+            post.author = currentUser.username;
+        })
+    );
 
-const getExploreUser = async (id) => {
-    const user = await UserModel.findById({ _id: id })
-    let posts = await PostModel.find({
+    //     // for await (const post of posts) {
+    // //         const user = await UserModel.findById(post.author).lean();
+    // //         post.author = user.username;
+    // //     }
+    // await Promise.all(
+    //     posts.map(async post => {
+    //         const user = await UserModel.findById(post.author).lean();
+    //         post.author = user.username;
+    //     })
+    // );
+
+    return posts;
+};
+
+exports.getExploreUser = async id => {
+    const user = await UserModel.findById({ _id: id });
+    const posts = await PostModel.find({
         author: {
             $nin: user.followings,
             $ne: user._id
         }
     })
         .sort({ createdAt: -1 })
-        .lean()
-    for await (let post of posts) {
-        const user = await UserModel.findById(post.author).lean()
-        if (user) {
-            post['author'] = user.username
-        }
-    }
-    return posts
-}
+        .lean();
 
-const getUserPosts = async (id) => {
-    let posts = await PostModel.find({
+    const postArray = Array.from(posts);
+    const updatedPosts = await Promise.all(
+        postArray.map(async post => {
+            const currentUser = await UserModel.findById(post.author).lean();
+            if (currentUser) {
+                return {
+                    ...post,
+                    author: currentUser.username
+                };
+            }
+            return post;
+        })
+    );
+    return updatedPosts;
+};
+
+exports.getUserPosts = async id => {
+    const posts = await PostModel.find({
         author: id
-    }).lean()
+    }).lean();
 
     posts.sort((a, b) => {
         if (!a.createdAt) {
-            return 1
+            return 1;
         }
         if (!b.createdAt) {
-            return -1
+            return -1;
         }
-        return new Date(b.createdAt) - new Date(a.createdAt)
-    })
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
 
-    return posts
-}
+    return posts;
+};
 
-const likedPosts = async (id) => {
-    const user = await UserModel.findOne({ _id: id }).lean()
+exports.likedPosts = async id => {
+    const user = await UserModel.findOne({ _id: id }).lean();
 
-    const array = []
+    const array = [];
     for (let i = 0; i < user.liked.length; i++) {
         await PostModel.findOne({ _id: user.liked[i] })
             .lean()
-            .then((res) => {
-                array.push(res)
-            })
+            .then(res => {
+                array.push(res);
+            });
     }
-    return array
-}
-
-export default {
-    getPosts,
-    getPost,
-    createPost,
-    deletePost,
-    updatePost,
-    likePost,
-    unlikePost,
-    getTimelineUser,
-    getExploreUser,
-    getUserPosts,
-    likedPosts
-}
+    return array;
+};

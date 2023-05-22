@@ -1,9 +1,14 @@
-import chalk from 'chalk'
-import { PROJECT_MODE, SERVER_HOSTNAME, SERVER_PORT } from './config/index.js'
-import { init, app } from './app.js'
-;(async () => {
+const chalk = require('chalk');
+const {
+    PROJECT_MODE,
+    SERVER_HOSTNAME,
+    SERVER_PORT
+} = require('./config/index.js');
+const { init, app } = require('./app.js');
+
+(async () => {
     try {
-        await init()
+        await init();
 
         app.listen(SERVER_PORT, () => {
             console.log(
@@ -14,9 +19,9 @@ import { init, app } from './app.js'
                 )}\nserver: ${chalk.blueBright(
                     `http://${SERVER_HOSTNAME}:${SERVER_PORT}`
                 )}\n-------`
-            )
-        })
+            );
+        });
     } catch (err) {
-        console.log(`${chalk.red.bold(err)}`)
+        console.log(err);
     }
-})()
+})();

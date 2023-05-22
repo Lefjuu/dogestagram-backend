@@ -1,33 +1,28 @@
-// Models
-import { hash } from '../../utils/auth.util.js'
-import CommentModel from '../models/comment.model.js'
-import PostModel from '../models/post.model.js'
+const { hash } = require('../../utils/auth.util.js');
+const CommentModel = require('../models/comment.model.js');
+const PostModel = require('../models/post.model.js');
 
-const getComments = async (id) => {
-    const post = await PostModel.findById(id).populate('comments').lean()
+exports.getComments = async id => {
+    const post = await PostModel.findById(id)
+        .populate('comments')
+        .lean();
 
-    let comment = await CommentModel.find({ post: post._id }).lean()
+    const comment = await CommentModel.find({ post: post._id }).lean();
 
-    return [comment]
-}
+    return [comment];
+};
 
-const createComment = async (id, username, description) => {
-    const uniqueString = hash(12)
+exports.createComment = async (id, username, description) => {
+    const uniqueString = hash(12);
     const comment = new CommentModel({
         _id: uniqueString,
         post: id,
         author: username,
         description: description
-    })
+    });
 
-    await comment.save()
-    const postById = await PostModel.findById(id)
-    postById.comments.push(comment._id)
-    await postById.save()
-    return
-}
-
-export default {
-    getComments,
-    createComment
-}
+    await comment.save();
+    const postById = await PostModel.findById(id);
+    postById.comments.push(comment._id);
+    await postById.save();
+};

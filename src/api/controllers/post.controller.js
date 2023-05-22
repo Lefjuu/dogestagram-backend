@@ -1,15 +1,16 @@
-import PostService from '../services/post.service.js'
-import validator from 'validator'
-import CodeEnum from '../../utils/statusCodes.js'
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
+const validator = require('validator');
+const PostService = require('../services/post.service.js');
+const CodeEnum = require('../../utils/statusCodes.js');
 
-const getPosts = async (req, res) => {
+exports.getPosts = async (req, res) => {
     try {
-        const posts = await PostService.getPosts()
-        res.status(200).json(posts)
+        const posts = await PostService.getPosts();
+        res.status(200).json(posts);
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -35,22 +36,22 @@ const getPosts = async (req, res) => {
  *         description: Internal server error
  */
 
-export const getPost = async (req, res) => {
+exports.getPost = async (req, res) => {
     try {
-        const { id } = req.params
+        const { id } = req.params;
         if (!id || !validator.isMongoId(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Id cannot be empty'
-            }
+            };
         }
 
-        const post = await PostService.getPost(id)
-        res.status(200).json(post)
+        const post = await PostService.getPost(id);
+        res.status(200).json(post);
     } catch (err) {
-        res.sendStatus(500)
+        res.sendStatus(500);
     }
-}
+};
 
 /**
  * @swagger
@@ -81,36 +82,36 @@ export const getPost = async (req, res) => {
  *         description: Internal server error
  */
 
-const createPost = async (req, res) => {
-    const { author, img, description } = req.body
+exports.createPost = async (req, res) => {
+    const { author, img, description } = req.body;
 
     try {
         if (!author || validator.isEmpty(author)) {
-            throw {
+            throw new Error({
                 code: CodeEnum.ProvideValues,
-                message: 'The author cannot be empty'
-            }
+                message: 'User id cannot be empty'
+            });
         }
 
         if (!img || validator.isEmpty(img)) {
-            throw {
+            throw new Error({
                 code: CodeEnum.ProvideValues,
-                message: 'The image must be provided'
-            }
+                message: 'User id cannot be empty'
+            });
         }
         if (!description || validator.isEmpty(description)) {
-            throw {
+            throw new Error({
                 code: CodeEnum.ProvideValues,
-                message: 'The description cannot be empty'
-            }
+                message: 'User id cannot be empty'
+            });
         }
-        const post = await PostService.createPost(req.body)
+        const post = await PostService.createPost(req.body);
 
-        res.status(201).json(post)
+        res.status(201).json(post);
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -153,23 +154,23 @@ const createPost = async (req, res) => {
  *         description: Internal server error
  */
 
-const deletePost = async (req, res) => {
+exports.deletePost = async (req, res) => {
     try {
-        const { id } = req.params
+        const { id } = req.params;
 
         if (!id || !validator.isMongoId(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Id cannot be empty'
-            }
+            };
         }
 
-        await PostService.deletePost(id)
-        res.sendStatus(204)
+        await PostService.deletePost(id);
+        res.sendStatus(204);
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -196,30 +197,29 @@ const deletePost = async (req, res) => {
  *         description: Internal server error
  */
 
-const updatePost = async (req, res) => {
+exports.updatePost = async (req, res) => {
     try {
-        const { id } = req.params
-        const { description } = req.body
+        const { id } = req.params;
+        const { description } = req.body;
 
         if (!id || validator.isEmpty(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Post Id cannot be empty'
-            }
+            };
         }
         if (!description || validator.isEmpty(description)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Description cannot be empty'
-            }
+            };
         }
-        const post = await PostService.updatePost(id, description)
-        res.status(200).json(post)
+        const post = await PostService.updatePost(id, description);
+        res.status(200).json(post);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -261,10 +261,10 @@ const updatePost = async (req, res) => {
  *         description: Internal server error
  */
 
-const likePost = async (req, res) => {
+exports.likePost = async (req, res) => {
     try {
-        const { id } = req.params
-        const { userId } = req.body
+        const { id } = req.params;
+        const { userId } = req.body;
 
         if (
             !id ||
@@ -275,14 +275,14 @@ const likePost = async (req, res) => {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Post Id cannot be empty'
-            }
+            };
         }
-        await PostService.likePost(id, userId)
-        res.sendStatus(201)
+        await PostService.likePost(id, userId);
+        res.sendStatus(201);
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -320,10 +320,10 @@ const likePost = async (req, res) => {
  *
  */
 
-const unlikePost = async (req, res) => {
+exports.unlikePost = async (req, res) => {
     try {
-        const { id } = req.params
-        const { userId } = req.body
+        const { id } = req.params;
+        const { userId } = req.body;
 
         if (
             !id ||
@@ -334,15 +334,15 @@ const unlikePost = async (req, res) => {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Post Id cannot be empty'
-            }
+            };
         }
 
-        await PostService.unlikePost(id, userId)
-        res.sendStatus(204)
+        await PostService.unlikePost(id, userId);
+        res.sendStatus(204);
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -379,23 +379,22 @@ const unlikePost = async (req, res) => {
  *           description: Internal server error
  */
 
-const getTimelineUser = async (req, res) => {
+exports.getTimelineUser = async (req, res) => {
     try {
-        const { id } = req.params
+        const { id } = req.params;
 
         if (!id || validator.isEmpty(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'User id cannot be empty'
-            }
+            };
         }
-        const timeline = await PostService.getTimelineUser(id)
-        res.status(200).json(timeline)
+        const timeline = await PostService.getTimelineUser(id);
+        res.status(200).json(timeline);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -428,23 +427,22 @@ const getTimelineUser = async (req, res) => {
  *           description: Internal server error
  */
 
-const getExploreUser = async (req, res) => {
+exports.getExploreUser = async (req, res) => {
     try {
-        const { id } = req.params
+        const { id } = req.params;
 
         if (!id || validator.isEmpty(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'User id cannot be empty'
-            }
+            };
         }
-        const posts = await PostService.getExploreUser(id)
-        res.status(200).json(posts)
+        const posts = await PostService.getExploreUser(id);
+        res.status(200).json(posts);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -477,23 +475,23 @@ const getExploreUser = async (req, res) => {
  *           description: Internal server error
  */
 
-const getUserPosts = async (req, res) => {
+exports.getUserPosts = async (req, res) => {
     try {
-        const { id } = req.params
+        const { id } = req.params;
 
         if (!id || !validator.isMongoId(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Id cannot be empty'
-            }
+            };
         }
 
-        const posts = await PostService.getUserPosts(id)
-        res.status(200).json(posts)
+        const posts = await PostService.getUserPosts(id);
+        res.status(200).json(posts);
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -526,23 +524,23 @@ const getUserPosts = async (req, res) => {
  *           description: Internal server error
  */
 
-const likedPosts = async (req, res) => {
+exports.likedPosts = async (req, res) => {
     try {
-        const { id } = req.params
+        const { id } = req.params;
 
         if (!id || !validator.isMongoId(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Id cannot be empty'
-            }
+            };
         }
 
-        const liked = await PostService.likedPosts(id)
-        res.status(200).json(liked)
+        const liked = await PostService.likedPosts(id);
+        res.status(200).json(liked);
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -574,17 +572,3 @@ const likedPosts = async (req, res) => {
  *       '500':
  *         description: Internal Server Error
  */
-
-export default {
-    getPosts,
-    getPost,
-    createPost,
-    deletePost,
-    updatePost,
-    likePost,
-    unlikePost,
-    getTimelineUser,
-    getExploreUser,
-    getUserPosts,
-    likedPosts
-}

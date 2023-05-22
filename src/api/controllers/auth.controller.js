@@ -1,39 +1,38 @@
-import validator from 'validator'
-import AuthService from '../services/auth.service.js'
-import { session } from '../../utils/auth.util.js'
-import CodeEnum from '../../utils/statusCodes.js'
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
+const validator = require('validator');
+const AuthService = require('../services/auth.service.js');
+const { session } = require('../../utils/auth.util.js');
+const CodeEnum = require('../../utils/statusCodes.js');
 
-const login = async (req, res) => {
+exports.login = async (req, res) => {
     try {
-        const { login, password } = req.body
+        const { login, password } = req.body;
 
         if (!login || validator.isEmpty(login)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'The login cannot be empty'
-            }
+            };
         }
 
         if (!password || validator.isEmpty(password)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'The password cannot be empty'
-            }
+            };
         }
 
-        const user = await AuthService.login(login, password)
+        const user = await AuthService.login(login, password);
         if (user) {
-            const { _id, permissions } = user
-            const token = await session(_id, { permissions })
-            return res.status(200).json({ user, token })
-        } else {
-            return res.sendStatus(401)
+            const { _id, permissions } = user;
+            const token = await session(_id, { permissions });
+            return res.status(200).json({ user, token });
         }
+        return res.sendStatus(401);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -73,39 +72,38 @@ const login = async (req, res) => {
  *         description: Server error occurred
  */
 
-const register = async (req, res) => {
+exports.register = async (req, res) => {
     try {
-        const { email, username, password } = req.body
+        const { email, username, password } = req.body;
 
         if (!email || validator.isEmpty(email)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'The email cannot be empty'
-            }
+            };
         }
 
         if (!username || validator.isEmpty(username)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'The username cannot be empty'
-            }
+            };
         }
 
         if (!password || validator.isEmpty(password)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'The password cannot be empty'
-            }
+            };
         }
 
-        const data = await AuthService.register(email, username, password)
-        let created = '_id' in data || 'n' in data
-        return res.status(201).json(created)
+        const data = await AuthService.register(email, username, password);
+        const created = '_id' in data || 'n' in data;
+        return res.status(201).json(created);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -145,34 +143,33 @@ const register = async (req, res) => {
  *         description: Server error occurred while processing the request
  */
 
-const me = async (req, res) => {
+exports.me = async (req, res) => {
     try {
-        const user_id = req.user.id
+        const userId = req.user.id;
 
-        if (validator.isEmpty(user_id)) {
+        if (validator.isEmpty(userId)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'The User id cannot be empty'
-            }
+            };
         }
 
-        if (!validator.isMongoId(user_id)) {
+        if (!validator.isMongoId(userId)) {
             throw {
                 code: CodeEnum.UserNotExist,
                 message: 'Invalid auth User id'
-            }
+            };
         }
 
-        if (user_id) {
-            let data = await AuthService.me(user_id)
-            return data ? res.status(200).json(data) : res.sendStatus(401)
-        } else {
-            return unauthorized(res)
+        if (userId) {
+            const data = await AuthService.me(userId);
+            return data ? res.status(200).json(data) : res.sendStatus(401);
         }
+        return res.status(401).json(res);
     } catch (err) {
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -195,23 +192,22 @@ const me = async (req, res) => {
  *         description: Internal server error
  */
 
-const sendEmail = async (req, res) => {
+exports.sendEmail = async (req, res) => {
     try {
-        const { email } = req.body
+        const { email } = req.body;
 
         if (!email || validator.isEmpty(email)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Email cannot be empty'
-            }
+            };
         }
-        await AuthService.sendEmail(email)
-        res.status(200).send('email sended')
+        await AuthService.sendEmail(email);
+        res.status(200).send('email sended');
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -254,10 +250,10 @@ const sendEmail = async (req, res) => {
  *                   description: The error message
  */
 
-const setNewPassword = async (req, res) => {
+exports.setNewPassword = async (req, res) => {
     try {
-        const { password, repeatedPassword } = req.body
-        const { string } = req.params
+        const { password, repeatedPassword } = req.body;
+        const { string } = req.params;
 
         if (
             !password ||
@@ -268,21 +264,20 @@ const setNewPassword = async (req, res) => {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Provide passwords'
-            }
+            };
         }
         if (password !== repeatedPassword) {
             throw {
                 code: CodeEnum.PasswordsNotIdentical,
                 message: 'Passwords are not this same'
-            }
+            };
         }
-        await AuthService.setNewPassword(string, password)
-        res.sendStatus(202)
+        await AuthService.setNewPassword(string, password);
+        res.sendStatus(202);
     } catch (err) {
-        console.log(err)
-        res.status(500).json(err)
+        res.status(500).json(err);
     }
-}
+};
 
 /**
  * @swagger
@@ -319,11 +314,3 @@ const setNewPassword = async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-
-export default {
-    login,
-    register,
-    sendEmail,
-    setNewPassword,
-    me
-}

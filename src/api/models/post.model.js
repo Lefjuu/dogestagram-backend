@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose');
 
 const PostSchema = mongoose.Schema(
     {
@@ -28,9 +28,9 @@ const PostSchema = mongoose.Schema(
         ]
     },
     { timestamps: true }
-)
+);
 
-export default mongoose.model('Post', PostSchema)
+module.exports = mongoose.model('Post', PostSchema);
 
 /**
  * @swagger

@@ -1,6 +1,8 @@
-import aggregatePaginate from 'mongoose-aggregate-paginate-v2'
-import mongoose, { Schema} from 'mongoose'
-import bcrypt from 'bcrypt'
+const aggregatePaginate = require('mongoose-aggregate-paginate-v2');
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+
+const { Schema } = mongoose;
 
 const UserSchema = new Schema({
     email: {
@@ -46,43 +48,42 @@ const UserSchema = new Schema({
         type: Date,
         default: null
     }
-})
+});
 
 // Plugins
-UserSchema.plugin(aggregatePaginate)
+UserSchema.plugin(aggregatePaginate);
 
 // Statics
-UserSchema.statics.compare = async (candidatePassword, password) => {
-    return await bcrypt.compareSync(candidatePassword, password)
-}
+UserSchema.statics.compare = async function(candidatePassword, password) {
+    return await bcrypt.compareSync(candidatePassword, password);
+};
 
 // Hooks
-UserSchema.pre('save', async function () {
-    const user = this
+UserSchema.pre('save', async function() {
+    const user = this;
     if (user.password) {
-        const hash = await bcrypt.hash(user.password, 10)
-        user.password = hash
+        const hash = await bcrypt.hash(user.password, 10);
+        user.password = hash;
     }
-})
+});
 
-UserSchema.pre('findOneAndUpdate', async function () {
-    const user = this._update
+UserSchema.pre('findOneAndUpdate', async function() {
+    const user = this._update;
     if (user.password) {
-        const hash = await bcrypt.hash(user.password, 10)
-        this._update.password = hash
+        const hash = await bcrypt.hash(user.password, 10);
+        this._update.password = hash;
     }
-})
+});
 
-UserSchema.pre('updateMany', async function () {
-    const user = this._update
+UserSchema.pre('updateMany', async function() {
+    const user = this._update;
     if (user.password) {
-        const hash = await bcrypt.hash(user.password, 10)
-        this._update.password = hash
+        const hash = await bcrypt.hash(user.password, 10);
+        this._update.password = hash;
     }
-})
+});
 
-export default mongoose.model('User', UserSchema)
-
+module.exports = mongoose.model('User', UserSchema);
 /**
  * @swagger
  * components:

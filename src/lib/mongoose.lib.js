@@ -1,40 +1,40 @@
-import mongoose from 'mongoose'
-import {
+const mongoose = require('mongoose');
+const {
     MONGODB_HOSTNAME,
     MONGODB_DATABASE,
     MONGODB_USERNAME,
     MONGODB_PASSWORD,
     PROJECT_MODE
-} from '../config/index.js'
+} = require('../config/index.js');
 
-const db = async () => {
-    new Promise((resolve, reject) => {
+const db = () => {
+    return new Promise((resolve, reject) => {
         if (PROJECT_MODE === 'development') {
-            mongoose.set('debug', true)
+            mongoose.set('debug', true);
         }
-        mongoose.set('strictQuery', false)
+        mongoose.set('strictQuery', false);
 
         mongoose.connect(
             MONGODB_USERNAME && MONGODB_PASSWORD
                 ? `mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOSTNAME}/${MONGODB_DATABASE}?retryWrites=true&w=majority`
-                : `mongodb://${MONGODB_HOSTNAME}${PORT}/${MONGODB_DATABASE}`,
+                : `mongodb://${MONGODB_HOSTNAME}:${MONGODB_DATABASE}`,
             {
                 useNewUrlParser: true,
                 useUnifiedTopology: true
             }
-        )
-        const db = mongoose.connection
+        );
+        const mongo = mongoose.connection;
 
-        db.once('connected', () => {
-            console.log('✅ MongoDB: connected!')
-            resolve()
-        })
+        mongo.once('connected', () => {
+            console.log('✅ MongoDB: connected!');
+            resolve();
+        });
 
-        db.on('error', (error) => {
-            console.error('❌ MongoDB: error')
-            reject(error)
-        })
-    })
-}
+        mongo.on('error', error => {
+            console.error('❌ MongoDB: error');
+            reject(error);
+        });
+    });
+};
 
-export default db
+module.exports = db;

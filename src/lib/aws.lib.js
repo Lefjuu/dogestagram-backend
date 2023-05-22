@@ -1,46 +1,46 @@
-import pkg from 'aws-sdk'
-const { S3 } = pkg
-import dotenv from 'dotenv'
-dotenv.config()
+const AWS = require('aws-sdk');
+const dotenv = require('dotenv');
 
-const bucketName = process.env.AWS_BUCKET_NAME
-const region = process.env.AWS_BUCKET_REGION
-const accessKeyId = process.env.AWS_ACCESS_KEY
-const secretAccessKey = process.env.AWS_SECRET_KEY
+dotenv.config();
 
-const s3 = new S3({
+const bucketName = process.env.AWS_BUCKET_NAME;
+const region = process.env.AWS_BUCKET_REGION;
+const accessKeyId = process.env.AWS_ACCESS_KEY;
+const secretAccessKey = process.env.AWS_SECRET_KEY;
+
+const s3 = new AWS.S3({
     region,
     accessKeyId,
     secretAccessKey
-})
+});
 
-export const uploadFile = async (file, author) => {
+exports.uploadFile = async (file, author) => {
     const base64Data = new Buffer.from(
         file.replace(/^data:image\/\w+;base64,/, ''),
         'base64'
-    )
-    const type = file.split(';')[0].split('/')[1]
+    );
+    const type = file.split(';')[0].split('/')[1];
     const uploadParams = {
         Bucket: bucketName,
         Key: `${author}.${type}`,
         Body: base64Data,
         ContentEncoding: 'base64',
         ContentType: `image/${type}`
-    }
+    };
 
-    return await s3.upload(uploadParams).promise()
-}
+    return await s3.upload(uploadParams).promise();
+};
 
-export const deleteFile = async (file) => {
+exports.deleteFile = async file => {
     try {
-        file = file.split('/').slice(-1)[0]
+        file = file.split('/').slice(-1)[0];
         const uploadParams = {
             Bucket: bucketName,
             Key: `${file}`
-        }
-        s3.deleteObject(uploadParams)
-        return
+        };
+        s3.deleteObject(uploadParams);
+        return;
     } catch (err) {
-        console.log(err)
+        console.log(err);
     }
-}
+};

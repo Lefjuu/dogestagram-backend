@@ -1,41 +1,41 @@
-import validator from 'validator'
-import CodeEnum from '../../utils/statusCodes.js'
-import CommentService from '../services/comment.service.js'
+// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
+const validator = require('validator');
+const CodeEnum = require('../../utils/statusCodes.js');
+const CommentService = require('../services/comment.service.js');
 
-const createComment = async (req, res) => {
+exports.createComment = async (req, res) => {
     try {
-        const { id } = req.params
-        const { username, description } = req.body
+        const { id } = req.params;
+        const { username, description } = req.body;
 
         if (!id || !validator.isMongoId(id)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Id cannot be empty'
-            }
+            };
         }
 
         if (!username || validator.isEmpty(username)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Username cannot be empty'
-            }
+            };
         }
 
         if (!description || validator.isEmpty(description)) {
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Description cannot be empty'
-            }
+            };
         }
 
-        await CommentService.createComment(id, username, description)
+        await CommentService.createComment(id, username, description);
 
-        res.sendStatus(201)
+        res.sendStatus(201);
     } catch (err) {
-        console.log(err)
-        res.sendStatus(500)
+        res.sendStatus(500);
     }
-}
+};
 
 /**
  * @swagger
@@ -83,23 +83,24 @@ const createComment = async (req, res) => {
  *         description: Server error
  */
 
-export const getComments = async (req, res) => {
+exports.getComments = async (req, res) => {
     try {
-        const { id } = req.params
+        const { id } = req.params;
 
         if (!id || validator.isEmpty(id)) {
+            // eslint-disable-next-line no-throw-literal
             throw {
                 code: CodeEnum.ProvideValues,
                 message: 'Post id in params cannot be empty'
-            }
+            };
         }
 
-        const post = await CommentService.getComments(req.params.id)
-        res.status(200).json(post)
+        const post = await CommentService.getComments(req.params.id);
+        res.status(200).json(post);
     } catch (err) {
-        res.sendStatus(500)
+        res.sendStatus(500);
     }
-}
+};
 
 /**
  * @swagger
@@ -130,8 +131,3 @@ export const getComments = async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-
-export default {
-    createComment,
-    getComments
-}
