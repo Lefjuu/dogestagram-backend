@@ -37,52 +37,6 @@ exports.createComment = async (req, res) => {
     }
 };
 
-/**
- * @swagger
- *   tags:
- *     name: Comment
- *     description: Comment actions
- * comment/add/:id:
- *   post:
- *     summary: Create a new comment for a post
- *     security:
- *       - bearerAuth: []
- *     tags: [Comment]
- *     description: Use this endpoint to create a new comment for a post by its ID
- *     parameters:
- *       - name: id
- *         in: path
- *         description: ID of the post to add a comment to
- *         required: true
- *         schema:
- *           type: string
- *       - name: username
- *         in: body
- *         description: Username of the comment author
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             username:
- *               type: string
- *       - name: description
- *         in: body
- *         description: Description of the comment
- *         required: true
- *         schema:
- *           type: object
- *           properties:
- *             description:
- *               type: string
- *     responses:
- *       201:
- *         description: Comment created successfully
- *       400:
- *         description: Invalid request body
- *       500:
- *         description: Server error
- */
-
 exports.getComments = async (req, res) => {
     try {
         const { id } = req.params;
@@ -101,33 +55,3 @@ exports.getComments = async (req, res) => {
         res.sendStatus(500);
     }
 };
-
-/**
- * @swagger
- * /comment/get/:id:
- *   get:
- *     summary: Retrieve comments for a post
- *     security:
- *       - bearerAuth: []
- *     tags: [Comment]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID of the post to retrieve comments for
- *         schema:
- *           type: string
- *     responses:
- *       '200':
- *         description: A list of comments for the post
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Comment'
- *       '400':
- *         description: Bad request, the ID parameter is missing or invalid
- *       '500':
- *         description: Internal server error
- */

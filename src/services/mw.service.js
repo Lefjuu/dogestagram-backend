@@ -18,7 +18,7 @@ exports.mw = required => {
                                 decoded.permissions.includes(x)
                             );
                             if (isAuthorized.length === 0)
-                                return forbidden(res);
+                                return res.sendStatus(403);
                         }
                     }
                     await renew(decoded.key);

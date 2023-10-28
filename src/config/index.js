@@ -4,7 +4,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 exports.BASE_PATH = path.normalize(path.join(__dirname, '..'));
-// console.log(path.normalize(path.join(__dirname, '..')));
 exports.PROJECT_MODE = process.env.PROJECT_MODE;
 exports.PROJECT_NAME = process.env.PROJECT_NAME;
 exports.SERVER_HOSTNAME = process.env.SERVER_HOSTNAME;

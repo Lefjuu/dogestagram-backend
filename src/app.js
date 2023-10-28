@@ -2,7 +2,6 @@ const express = require('express');
 const { create } = require('./lib/express.lib.js');
 const { routes } = require('./services/router.service.js');
 const { connect: redis } = require('./lib/redis.lib.js');
-const swagger = require('./lib/swagger.lib.js');
 const mongoose = require('./lib/mongoose.lib.js');
 const { checkS3Connection } = require('./lib/aws.lib.js');
 
@@ -11,9 +10,6 @@ const app = express();
 const init = async () => {
     // express
     await create(app);
-
-    // swagger
-    await swagger(app);
 
     // redis
     await redis();
