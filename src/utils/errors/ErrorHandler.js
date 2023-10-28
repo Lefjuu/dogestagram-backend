@@ -1,4 +1,4 @@
-const { NODE_ENV, PROJECT_MODE } = require('../../config');
+const { PROJECT_MODE } = require('../../config');
 const AppError = require('./AppError');
 
 const handleCastErrorDB = err => {
