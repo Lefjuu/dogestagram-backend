@@ -1,11 +1,21 @@
 const Redis = require('ioredis');
-const { REDIS_HOSTNAME } = require('../config/index.js');
+const {
+    REDIS_HOSTNAME,
+    REDIS_HOSTNAME_DEV,
+    REDIS_PORT,
+    PROJECT_MODE
+} = require('../config/index.js');
 
 let redis;
 
 const connect = () =>
     new Promise((resolve, reject) => {
-        const r = new Redis(REDIS_HOSTNAME);
+        let r;
+        if (PROJECT_MODE === 'development') {
+            r = new Redis(`${REDIS_HOSTNAME_DEV}:${REDIS_PORT}`);
+        } else {
+            r = new Redis(`${REDIS_HOSTNAME}:${REDIS_PORT}`);
+        }
 
         r.on('connect', function() {
             console.log('✅ Redis: connected!');
@@ -24,4 +34,14 @@ const set = async (...args) => {
     return redis.set(...args);
 };
 
-module.exports = { connect, redis, set };
+const get = async (...args) => {
+    await connect();
+    return redis.get(...args);
+};
+
+const expire = async (...args) => {
+    await connect();
+    return redis.expire(...args);
+};
+
+module.exports = { connect, redis, set, get, expire };

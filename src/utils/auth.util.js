@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET_KEY, REDIS_TTL } = require('../config/index.js');
-const { redis, set } = require('../lib/redis.lib.js');
+const { set, get, expire } = require('../lib/redis.lib.js');
 const moment = require('moment');
 
 const sign = async data => {
@@ -38,10 +38,19 @@ exports.session = async (id, data) => {
     }
 };
 
+const decode = async token => {
+    try {
+        return await jwt.decode(token, JWT_SECRET_KEY);
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+};
+
 exports.check = async token => {
     try {
         const decoded = await decode(token);
-        const data = await redis.get(decoded.key);
+        const data = await get(decoded.key);
         if (decoded.key) {
             const id = decoded.key.split(':');
             return decoded.key && data ? { ...decoded, id: id[0] } : null;
@@ -53,20 +62,11 @@ exports.check = async token => {
     }
 };
 
-const decode = async token => {
-    try {
-        return await jwt.decode(token, JWT_SECRET_KEY);
-    } catch (err) {
-        console.log(err);
-        return null;
-    }
-};
-
 exports.renew = async key => {
     try {
-        await redis.expire(key, REDIS_TTL.trimester);
+        await expire(key, REDIS_TTL.trimester);
     } catch (err) {
-        console.log(err);
+        console.error('Error renewing session:', err);
         return null;
     }
 };

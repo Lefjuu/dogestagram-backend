@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+    redis:
+        image: 'redis:latest'
+        container_name: dogestagram-redis
+        ports:
+            - '6379:6379'
+    mongo:
+        image: 'mongo:latest'
+        container_name: dogestagram-mongo
+        ports:
+            - '27017:27017'
