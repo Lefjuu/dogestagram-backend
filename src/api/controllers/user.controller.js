@@ -57,6 +57,33 @@ exports.checkUsernameAvailable = CatchError(async (req, res, next) => {
     });
 });
 
+exports.getUserFollowers = CatchError(async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!id || validator.isEmpty(id)) {
+        return next(new AppError('Provide Id', 400, CodeEnum.ProvideValues));
+    }
+
+    const usersArray = await userService.getUserFollowers(id);
+    res.status(200).json({
+        status: 'success',
+        data: usersArray
+    });
+});
+
+exports.getUserFollowings = CatchError(async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!id || validator.isEmpty(id)) {
+        return next(new AppError('Provide Id', 400, CodeEnum.ProvideValues));
+    }
+
+    const usersArray = await userService.getUserFollowings(id);
+    res.status(200).json({
+        status: 'success',
+        data: usersArray
+    });
+});
 exports.followUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -98,42 +125,6 @@ exports.unfollowUser = async (req, res) => {
         }
         await UserService.unfollowUser(id, userId);
         return res.sendStatus(202);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-};
-
-exports.getUserFollowers = async (req, res) => {
-    try {
-        const { username } = req.params;
-
-        if (!username || validator.isEmpty(username)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Username cannot be empty'
-            };
-        }
-
-        const usersArray = await UserService.getUserFollowers(username);
-        res.status(200).json(usersArray);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-};
-
-exports.getUserFollowings = async (req, res) => {
-    try {
-        const { username } = req.params;
-
-        if (!username || validator.isEmpty(username)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Username cannot be empty'
-            };
-        }
-
-        const usersArray = await UserService.getUserFollowings(username);
-        res.status(200).json(usersArray);
     } catch (err) {
         res.status(500).json(err);
     }

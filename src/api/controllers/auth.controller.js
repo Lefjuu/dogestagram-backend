@@ -75,14 +75,21 @@ exports.login = CatchError(async (req, res, next) => {
     if (user instanceof AppError) {
         return next(user);
     }
-    if (user) {
-        const response = await generateAccessTokenWithUser(user, req, res);
-
-        return res.status(200).json(response);
+    if (!user) {
+        return next(
+            new AppError(
+                'Invalid credentials',
+                400,
+                CodeEnum.InvalidCredentials
+            )
+        );
     }
-    return next(
-        new AppError('Invalid credentials', 400, CodeEnum.InvalidCredentials)
-    );
+    const response = await generateAccessTokenWithUser(user, req, res);
+
+    res.status(200).json({
+        status: 'success',
+        data: response
+    });
 });
 
 exports.verify = CatchError(async (req, res, next) => {
@@ -135,7 +142,10 @@ exports.forgotPassword = CatchError(async (req, res, next) => {
     if (data instanceof AppError) {
         return next(data);
     }
-    res.status(200).send('email sent');
+    res.status(200).json({
+        status: 'success',
+        message: 'email sent'
+    });
 });
 
 exports.setNewPassword = CatchError(async (req, res, next) => {
@@ -162,5 +172,9 @@ exports.setNewPassword = CatchError(async (req, res, next) => {
         );
     }
     await authService.setNewPassword(string, password);
-    res.sendStatus(202);
+
+    res.status(200).json({
+        status: 'success',
+        message: 'password updated'
+    });
 });

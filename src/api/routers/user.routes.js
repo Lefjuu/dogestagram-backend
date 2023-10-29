@@ -8,6 +8,11 @@ module.exports = app => {
     );
     app.get('/api/users/:id', mw(['user']), userController.getUser);
     app.patch('/api/users', mw(['user']), userController.updateUser);
+    app.get(
+        '/api/users/followers/:id',
+        mw(['user']),
+        userController.getUserFollowers
+    );
 
     // app.patch(
     //     '/api/users/new-password',
@@ -19,11 +24,6 @@ module.exports = app => {
     //     '/api/users/unfollow/:id',
     //     mw(['user']),
     //     UserController.unfollowUser
-    // );
-    // app.get(
-    //     '/api/users/:username/followers',
-    //     mw(['user']),
-    //     UserController.getUserFollowers
     // );
     // app.get(
     //     '/api/users/:username/followings',

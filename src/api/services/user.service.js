@@ -69,6 +69,47 @@ exports.updateUser = async (id, body) => {
     return updatedData;
 };
 
+exports.getUserFollowers = async id => {
+    const user = await UserModel.findById(id).lean();
+    if (!user) {
+        throw new AppError(`User not found`, 400, CodeEnum.UserNotFound);
+    }
+
+    const usersArray = [];
+    for (let i = 0; i < user.followers.length; i++) {
+        await UserModel.findOne({ _id: user.followers[i] })
+            .select(
+                '-password -email -liked -permissions -active -deleted_at -__v -followers -followings'
+            )
+            .lean()
+            .then(res => {
+                usersArray.push(res);
+            });
+    }
+
+    return usersArray;
+};
+
+exports.getUserFollowings = async id => {
+    const user = await UserModel.findById(id).lean();
+    if (!user) {
+        throw new AppError(`User not found`, 400, CodeEnum.UserNotFound);
+    }
+
+    const usersArray = [];
+    for (let i = 0; i < user.followings.length; i++) {
+        await UserModel.findOne({ _id: user.followings[i] })
+            .select(
+                '-password -email -liked -permissions -active -deleted_at -__v -followers -followings'
+            )
+            .lean()
+            .then(res => {
+                usersArray.push(res);
+            });
+    }
+    return usersArray;
+};
+
 exports.unfollowUser = async (id, userId) => {
     const exists = await UserModel.exists({
         _id: userId,
@@ -102,33 +143,4 @@ exports.unfollowUser = async (id, userId) => {
             }
         }
     );
-};
-
-exports.getUserFollowers = async username => {
-    const user = await UserModel.findOne({ username }).lean();
-
-    const usersArray = [];
-    for (let i = 0; i < user.followers.length; i++) {
-        await UserModel.findOne({ _id: user.followers[i] })
-            .lean()
-            .then(res => {
-                usersArray.push(res);
-            });
-    }
-
-    return usersArray;
-};
-
-exports.getUserFollowings = async username => {
-    const user = await UserModel.findOne({ username }).lean();
-
-    const usersArray = [];
-    for (let i = 0; i < user.followings.length; i++) {
-        await UserModel.findOne({ _id: user.followings[i] })
-            .lean()
-            .then(res => {
-                usersArray.push(res);
-            });
-    }
-    return usersArray;
 };
