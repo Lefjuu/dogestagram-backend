@@ -17,19 +17,19 @@ const UserSchema = new Schema({
     },
     name: {
         type: String,
-        trim: true,
         default: null
     },
     password: {
         type: String,
-        select: false,
-        default: null
+        select: false
     },
     biography: {
         type: String
     },
     img: {
-        type: String
+        type: String,
+        default:
+            'https://dogestagram.s3.eu-west-2.amazonaws.com/white-user-member-guest-icon-png-image-31634946729lnhivlto5f.png'
     },
     followers: {
         type: Array
@@ -43,6 +43,13 @@ const UserSchema = new Schema({
     permissions: {
         type: Array,
         default: ['user']
+    },
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+    active: {
+        type: Boolean,
+        default: false
     },
     deleted_at: {
         type: Date,
