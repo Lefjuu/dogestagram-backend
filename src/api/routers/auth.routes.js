@@ -6,7 +6,7 @@ module.exports = app => {
     app.post('/api/auth/register', authController.register);
     //TODO: app.get('/verify-email', AuthController.sendVerifyEmail);
     app.post('/api/auth/verify/:token', authController.verify);
-    app.post('/api/auth/forgot-password', authController.sendEmail);
+    app.post('/api/auth/forgot-password', authController.forgotPassword);
     app.patch('/api/auth/new-password/:string', authController.setNewPassword);
     app.get('/api/auth/me', mw(['user']), authController.me);
 };

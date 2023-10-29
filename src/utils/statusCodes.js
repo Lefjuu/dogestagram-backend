@@ -45,7 +45,7 @@ exports.CodeEnum = {
     AlreadyExist: 856,
     ProvideValues: 857,
     VerifyAccount: 858,
-    UserNotExist: 859,
+    WrongValues: 859,
     TokenExpired: 862,
     UserBanned: 863,
     ProvidePassword: 864,

@@ -5,7 +5,7 @@ const {
     REDIS_TTL,
     JWT_ACCESS_EXPIRES_IN
 } = require('../config/index.js');
-const { set, get, expire } = require('../lib/redis.lib.js');
+const { set, get, expire, redis } = require('../lib/redis.lib.js');
 const moment = require('moment');
 
 const generateAccessToken = id => {
@@ -42,8 +42,15 @@ const hash = length => {
 };
 
 const generateAccessTokenWithUser = async (user, req, res) => {
-    const accessToken = generateAccessToken(user._id);
+    // const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
+
+    const { _id, permissions } = user;
+    const accessToken = await session(_id, {
+        permissions
+    });
+    console.log(accessToken);
+    console.log(accessToken);
 
     const secure = req
         ? req.secure || req.headers['x-forwarded-proto'] === 'https'
@@ -80,6 +87,7 @@ const session = async (id, data) => {
     try {
         const key = `${id}:${hash(8)}`;
         const token = await sign({ key, ...data });
+        console.log(key);
         if (token) {
             await set(key, moment().toISOString(), 'EX', REDIS_TTL.trimester);
             return token;
@@ -92,7 +100,7 @@ const session = async (id, data) => {
 
 const check = async token => {
     try {
-        const decoded = await jwt.verify(token, JWT_ACCESS_EXPIRES_IN);
+        const decoded = await decode(token);
         const data = await get(decoded.key);
         if (decoded.key) {
             const id = decoded.key.split(':');
@@ -110,6 +118,15 @@ const renew = async key => {
         await expire(key, REDIS_TTL.trimester);
     } catch (err) {
         console.error('Error renewing session:', err);
+        return null;
+    }
+};
+
+const decode = async token => {
+    try {
+        return await jwt.decode(token, JWT_SECRET_ACCESS_KEY);
+    } catch (err) {
+        console.log(err);
         return null;
     }
 };

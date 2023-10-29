@@ -4,16 +4,13 @@ const {
     EMAIL_PORT,
     EMAIL_USERNAME,
     EMAIL_PASSWORD,
-    EMAIL_FROM,
-    NODE_ENV
+    EMAIL_FROM
 } = require('../config');
 
 module.exports = class Email {
     constructor(user, url) {
-        // this.to = user.email;
         this.to = 'karol.legut121@gmail.com';
         this.email = 'karol.legut121@gmail.com';
-        // this.firstName = user.name.split(' ')[0];
         this.url = url;
         this.from = `Lefju <${EMAIL_FROM}>`;
     }

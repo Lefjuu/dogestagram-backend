@@ -97,14 +97,6 @@ exports.register = async (newUser, url) => {
                 .then(() => {
                     return user;
                 });
-            const {
-                password,
-                __v,
-                active,
-                ...userWithoutPassword
-            } = user.toObject();
-
-            // return userWithoutPassword;
         }
     } catch (error) {
         console.log(error);
@@ -126,19 +118,22 @@ exports.verify = async token => {
     );
 };
 
-exports.sendEmail = async email => {
-    await UserModel.findOne({ email })
-        .lean()
-        .then(res => {
-            if (res === null) {
-                throw {
-                    code: CodeEnum.UserNotFound,
-                    message: `User with email: ${email} doesn't exist`
-                };
-            }
-        });
+exports.forgotPassword = async (email, url) => {
+    const user = await UserModel.findOne({ email }).lean();
 
-    await sendResetPasswordEmail(email);
+    if (!user) {
+        throw new AppError(`User not found`, 400, CodeEnum.UserNotFound);
+    }
+
+    const token = await makeId(20);
+    await TokenModel.create({
+        email,
+        token
+    });
+    const urlWithToken = url + token;
+    console.log(user);
+
+    await new Email(user, urlWithToken).sendPasswordReset(email);
 };
 
 exports.setNewPassword = async (string, password) => {
@@ -148,16 +143,10 @@ exports.setNewPassword = async (string, password) => {
         .lean()
         .then(async res => {
             if (res === null) {
-                throw {
-                    code: CodeEnum.TokenExpired,
-                    message: `Token expired`
-                };
+                throw new AppError(`Token expired`, 400, CodeEnum.TokenExpired);
             }
             if (res.token !== string) {
-                throw {
-                    code: CodeEnum.RequestTimeout,
-                    message: `Token expired 2`
-                };
+                throw new AppError(`Token expired`, 400, CodeEnum.TokenExpired);
             }
             await UserModel.findOneAndUpdate(
                 {
