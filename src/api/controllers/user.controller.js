@@ -44,7 +44,7 @@ exports.updateUser = CatchError(async (req, res, next) => {
 exports.checkUsernameAvailable = CatchError(async (req, res, next) => {
     const { username } = req.params;
 
-    if (username) {
+    if (!username) {
         return next(
             new AppError('Provide username', 400, CodeEnum.ProvideValues)
         );
