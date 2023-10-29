@@ -1,60 +1,72 @@
+const { default: mongoose } = require('mongoose');
 const { deleteFile, uploadFile } = require('../../lib/aws.lib.js');
-const CodeEnum = require('../../utils/statusCodes.util.js');
+const AppError = require('../../utils/errors/AppError.js');
+const { CodeEnum } = require('../../utils/statusCodes.util.js');
 const UserModel = require('../models/user.model.js');
 const { v4: uuidv4 } = require('uuid');
 
-exports.getUser = async username => {
-    const user = await UserModel.findOne({
-        username: username,
-        deleted_at: null
-    }).lean();
+exports.getUser = async _id => {
+    const user = await UserModel.aggregate([
+        {
+            $match: {
+                _id: mongoose.Types.ObjectId(_id)
+            }
+        },
+        {
+            $project: {
+                followersCount: { $size: '$followers' },
+                followingsCount: { $size: '$followings' },
+                username: 1,
+                name: 1,
+                img: 1
+            }
+        }
+    ]);
     if (user) {
         if (user.deleted_at)
-            throw {
-                code: CodeEnum.UserBanned,
-                message: 'The user has been banned'
-            };
+            throw new AppError(
+                'The user has been banned',
+                400,
+                CodeEnum.UserBanned
+            );
         return user;
     }
-    throw {
-        code: CodeEnum.UserNotFound,
-        message: 'User not found'
-    };
+    throw new AppError('User not found', 403, CodeEnum.UserNotFound);
 };
 
-exports.followUser = async (id, userId) => {
-    const exists = await UserModel.exists({
-        _id: userId,
-        followers: {
-            $in: [id]
-        }
-    }).lean();
-    if (exists) {
-        throw {
-            code: CodeEnum.AlreadyFollowed,
-            message: 'Already followed user'
-        };
+exports.checkUsernameAvailable = async username => {
+    const user = await UserModel.findOne({ username });
+    if (user) {
+        return false;
+    } else {
+        return true;
     }
-    await UserModel.findByIdAndUpdate(
-        {
-            _id: id
-        },
-        {
-            $push: {
-                followings: userId
-            }
+};
+
+exports.updateUser = async (id, body) => {
+    await UserModel.findOne({ _id: id }).then(async res => {
+        if (res === null) {
+            throw {
+                code: CodeEnum.UserNotFound,
+                message: 'User not found'
+            };
         }
-    );
-    await UserModel.findByIdAndUpdate(
-        {
-            _id: userId
-        },
-        {
-            $push: {
-                followers: id
-            }
+        // TODO: TO CHECK
+        if (body.img) {
+            deleteFile(res.img);
+            const FileId = uuidv4();
+            const result = await uploadFile(body.img, FileId);
+            body.img = result.Location;
+            s;
         }
-    );
+    });
+    const updatedData = await UserModel.findOneAndUpdate({ _id: id }, body, {
+        new: true,
+        runValidators: true
+    }).then(res => {
+        return res;
+    });
+    return updatedData;
 };
 
 exports.unfollowUser = async (id, userId) => {
@@ -90,30 +102,6 @@ exports.unfollowUser = async (id, userId) => {
             }
         }
     );
-};
-
-exports.updateUser = async (id, body) => {
-    await UserModel.findOne({ _id: id }).then(async res => {
-        if (res === null) {
-            throw {
-                code: CodeEnum.UserNotFound,
-                message: 'User not found'
-            };
-        }
-        if (body.img) {
-            deleteFile(res.img);
-            const FileId = uuidv4();
-            const result = await uploadFile(body.img, FileId);
-            body.img = result.Location;
-        }
-    });
-    const updatedData = await UserModel.findOneAndUpdate({ _id: id }, body, {
-        new: true,
-        runValidators: true
-    }).then(res => {
-        return res;
-    });
-    return updatedData;
 };
 
 exports.getUserFollowers = async username => {

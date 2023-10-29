@@ -1,38 +1,61 @@
-/* eslint-disable no-unused-vars */
-// eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
 const validator = require('validator');
-const UserService = require('../services/user.service.js');
-const CodeEnum = require('../../utils/statusCodes.util.js');
+const AppError = require('../../utils/errors/AppError.js');
+const { CodeEnum } = require('../../utils/statusCodes.util.js');
+const { userService } = require('../services/index.js');
+const CatchError = require('../../utils/errors/CatchError.js');
 
-exports.getUser = async (req, res) => {
-    try {
-        const { username } = req.params;
-        if (!username || validator.isEmpty(username)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'The username cannot be empty'
-            };
-        }
-
-        const user = await UserService.getUser(username);
-        if (user) {
-            const {
-                lastLogin,
-                date,
-                email,
-                roles,
-                status,
-                permissions,
-                liked,
-                ...thisUser
-            } = user;
-            return res.status(200).json({ ...thisUser });
-        }
-        return res.sendStatus(401);
-    } catch (err) {
-        res.status(500).json(err);
+exports.getUser = CatchError(async (req, res, next) => {
+    const { id } = req.params;
+    if (!id) {
+        return next(
+            new AppError('id cannot be empty', 400, CodeEnum.ProvideValues)
+        );
     }
-};
+    const user = await userService.getUser(id);
+    res.status(200).json({
+        status: 'success',
+        data: user
+    });
+});
+
+exports.updateUser = CatchError(async (req, res, next) => {
+    const { id } = req.user;
+    const { name, biography, img } = req.body;
+    const validBody = { name, biography, img };
+    if (req.body.password) {
+        return next(
+            new AppError(`Don't update password`, 400, CodeEnum.WrongValues)
+        );
+    }
+
+    if (req.body.email) {
+        return next(
+            new AppError(`You can't change email`, 400, CodeEnum.WrongValues)
+        );
+    }
+
+    const updatedData = await userService.updateUser(id, validBody);
+    res.status(200).json({
+        status: 'success',
+        data: updatedData
+    });
+});
+
+exports.checkUsernameAvailable = CatchError(async (req, res, next) => {
+    const { username } = req.params;
+
+    if (username) {
+        return next(
+            new AppError('Provide username', 400, CodeEnum.ProvideValues)
+        );
+    }
+
+    const data = await userService.checkUsernameAvailable(username);
+    res.status(200).json({
+        status: 'success',
+        data: data
+    });
+});
 
 exports.followUser = async (req, res) => {
     try {
@@ -75,25 +98,6 @@ exports.unfollowUser = async (req, res) => {
         }
         await UserService.unfollowUser(id, userId);
         return res.sendStatus(202);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-};
-
-exports.updateUser = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { body } = req;
-
-        if (!id || !validator.isMongoId(id)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Id cannot be empty'
-            };
-        }
-
-        const updatedData = await UserService.updateUser(id, body);
-        res.status(200).json(updatedData);
     } catch (err) {
         res.status(500).json(err);
     }
