@@ -2,7 +2,7 @@ const Email = require('../../utils/email.util.js');
 const sendResetPasswordEmail = require('../../utils/email.util.js');
 const AppError = require('../../utils/errors/AppError.js');
 const { makeId } = require('../../utils/helper.util.js');
-const { CodeEnum } = require('../../utils/statusCodes.js');
+const { CodeEnum } = require('../../utils/statusCodes.util.js');
 const TokenModel = require('../models/token.model.js');
 const userModel = require('../models/user.model.js');
 const UserModel = require('../models/user.model.js');
@@ -89,7 +89,7 @@ exports.register = async (newUser, url) => {
         if (!exists) {
             const user = await UserModel.create(newUser);
 
-            const token = await makeId(20);
+            const token = await makeId(50);
             await TokenModel.create({ email: newUser.email, token });
             const urlWithToken = url + token;
             await new Email(user.toObject(), urlWithToken)

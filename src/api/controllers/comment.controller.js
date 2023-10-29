@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
 const validator = require('validator');
-const CodeEnum = require('../../utils/statusCodes.js');
+const CodeEnum = require('../../utils/statusCodes.util.js');
 const CommentService = require('../services/comment.service.js');
 
 exports.createComment = async (req, res) => {

@@ -2,7 +2,7 @@ const validator = require('validator');
 const { error } = require('../utils/helper.util.js');
 const { check, renew } = require('../utils/jwt.util.js');
 const AppError = require('../utils/errors/AppError.js');
-const { CodeEnum } = require('../utils/statusCodes.js');
+const { CodeEnum } = require('../utils/statusCodes.util.js');
 
 exports.mw = required => {
     return async (req, res, next) => {

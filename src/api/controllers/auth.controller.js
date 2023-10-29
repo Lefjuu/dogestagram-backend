@@ -2,7 +2,7 @@ const validator = require('validator');
 const AppError = require('../../utils/errors/AppError.js');
 const { authService } = require('../services/index.js');
 const { generateAccessTokenWithUser } = require('../../utils/jwt.util.js');
-const { CodeEnum } = require('../../utils/statusCodes.js');
+const { CodeEnum } = require('../../utils/statusCodes.util.js');
 const CatchError = require('../../utils/errors/CatchError.js');
 
 exports.register = CatchError(async (req, res, next) => {

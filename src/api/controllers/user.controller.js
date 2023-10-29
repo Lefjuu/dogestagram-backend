@@ -2,7 +2,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
 const validator = require('validator');
 const UserService = require('../services/user.service.js');
-const CodeEnum = require('../../utils/statusCodes.js');
+const CodeEnum = require('../../utils/statusCodes.util.js');
 
 exports.getUser = async (req, res) => {
     try {

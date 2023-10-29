@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const UserModel = require('../models/user.model.js');
 const PostModel = require('../models/post.model.js');
 const { deleteFile, uploadFile } = require('../../lib/aws.lib.js');
-const CodeEnum = require('../../utils/statusCodes.js');
+const CodeEnum = require('../../utils/statusCodes.util.js');
 
 exports.getPosts = async () => {
     const posts = await PostModel.find({});

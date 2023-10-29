@@ -1,5 +1,5 @@
 const { deleteFile, uploadFile } = require('../../lib/aws.lib.js');
-const CodeEnum = require('../../utils/statusCodes.js');
+const CodeEnum = require('../../utils/statusCodes.util.js');
 const UserModel = require('../models/user.model.js');
 const { v4: uuidv4 } = require('uuid');
 

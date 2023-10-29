@@ -1,4 +1,4 @@
-const { hash } = require('../../utils/auth.util.js');
+const { hash } = require('bcrypt');
 const CommentModel = require('../models/comment.model.js');
 const PostModel = require('../models/post.model.js');
 
