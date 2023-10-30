@@ -8,5 +8,6 @@ module.exports = app => {
     app.post('/api/auth/verify/:token', authController.verify);
     app.post('/api/auth/forgot-password', authController.forgotPassword);
     app.patch('/api/auth/new-password/:string', authController.setNewPassword);
+    app.get('/api/auth/refresh', authController.refresh);
     app.get('/api/auth/me', mw(['user']), authController.me);
 };

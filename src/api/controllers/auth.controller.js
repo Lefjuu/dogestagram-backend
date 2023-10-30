@@ -1,7 +1,11 @@
 const validator = require('validator');
 const AppError = require('../../utils/errors/AppError.js');
-const { authService } = require('../services/index.js');
-const { generateAccessTokenWithUser } = require('../../utils/jwt.util.js');
+const { authService, userService } = require('../services/index.js');
+const {
+    generateAccessTokenWithUser,
+    decodeRefreshToken,
+    generateTokensOnly
+} = require('../../utils/jwt.util.js');
 const { CodeEnum } = require('../../utils/statusCodes.util.js');
 const CatchError = require('../../utils/errors/CatchError.js');
 
@@ -86,10 +90,7 @@ exports.login = CatchError(async (req, res, next) => {
     }
     const response = await generateAccessTokenWithUser(user, req, res);
 
-    res.status(200).json({
-        status: 'success',
-        data: response
-    });
+    res.status(200).json(response);
 });
 
 exports.verify = CatchError(async (req, res, next) => {
@@ -176,5 +177,31 @@ exports.setNewPassword = CatchError(async (req, res, next) => {
     res.status(200).json({
         status: 'success',
         message: 'password updated'
+    });
+});
+
+exports.refresh = CatchError(async (req, res, next) => {
+    const refreshToken = req.body.refreshtoken;
+    console.log(refreshToken);
+
+    if (!refreshToken) {
+        return next(new AppError('Refresh token not provided.', 401));
+    }
+
+    const decoded = await decodeRefreshToken(refreshToken);
+    const currentUser = await userService.getUser(decoded.userId);
+    if (!currentUser) {
+        return next(
+            new AppError(
+                'The user belonging to this token does no longer exist.',
+                401
+            )
+        );
+    }
+
+    const tokens = await generateTokensOnly(currentUser.id);
+    res.status(200).json({
+        status: 'success',
+        data: tokens
     });
 });

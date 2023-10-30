@@ -49,8 +49,6 @@ const generateAccessTokenWithUser = async (user, req, res) => {
     const accessToken = await session(_id, {
         permissions
     });
-    console.log(accessToken);
-    console.log(accessToken);
 
     const secure = req
         ? req.secure || req.headers['x-forwarded-proto'] === 'https'
@@ -79,8 +77,10 @@ const generateAccessTokenWithUser = async (user, req, res) => {
     };
 };
 
-const generateAccessTokenOnly = id => {
-    return generateAccessToken(id);
+const generateTokensOnly = id => {
+    const accessToken = generateAccessToken(id);
+    const refreshToken = generateRefreshToken(id);
+    return { accessToken, refreshToken };
 };
 
 const session = async (id, data) => {
@@ -100,7 +100,7 @@ const session = async (id, data) => {
 
 const check = async token => {
     try {
-        const decoded = await decode(token);
+        const decoded = await decodeAccessToken(token);
         const data = await get(decoded.key);
         if (decoded.key) {
             const id = decoded.key.split(':');
@@ -122,7 +122,7 @@ const renew = async key => {
     }
 };
 
-const decode = async token => {
+const decodeAccessToken = async token => {
     try {
         return await jwt.decode(token, JWT_SECRET_ACCESS_KEY);
     } catch (err) {
@@ -131,10 +131,20 @@ const decode = async token => {
     }
 };
 
+const decodeRefreshToken = async token => {
+    try {
+        return await jwt.decode(token, JWT_SECRET_REFRESH_KEY);
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+};
+
 module.exports = {
     generateAccessTokenWithUser,
-    generateAccessTokenOnly,
+    generateTokensOnly,
     session,
     check,
-    renew
+    renew,
+    decodeRefreshToken
 };
