@@ -8,9 +8,8 @@ exports.routes = async app => {
     const files = fs.readdirSync(routerPath);
 
     files.forEach(async route => {
-        app.use(globalErrorHandler);
-
         const routeModule = require(`${routerPath}/${route}`);
+
         if (typeof routeModule === 'function') {
             await routeModule(app);
         } else if (typeof routeModule.default === 'function') {
@@ -18,13 +17,11 @@ exports.routes = async app => {
         } else {
             console.error(`Invalid module export for route: ${route}`);
         }
-        app.all('*', (req, res, next) => {
-            next(
-                new AppError(
-                    `Can't find ${req.originalUrl} on this server!`,
-                    404
-                )
-            );
-        });
+        app.use(globalErrorHandler);
+    });
+    app.all('*', (req, res, next) => {
+        next(
+            new AppError(`Can't find ${req.originalUrl} on this server!`, 404)
+        );
     });
 };
