@@ -182,7 +182,6 @@ exports.setNewPassword = CatchError(async (req, res, next) => {
 
 exports.refresh = CatchError(async (req, res, next) => {
     const refreshToken = req.body.refreshtoken;
-    console.log(refreshToken);
 
     if (!refreshToken) {
         return next(new AppError('Refresh token not provided.', 401));

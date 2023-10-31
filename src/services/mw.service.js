@@ -14,7 +14,6 @@ exports.mw = required => {
                     if (!validator.isJWT(token)) throw 'Token is not valid';
                     req.headers.authorization = `Bearer ${token}`;
                     const decoded = await check(token);
-                    console.log(decoded);
                     if (required) {
                         if ('permissions' in decoded) {
                             const isAuthorized = required.filter(x =>
@@ -33,8 +32,7 @@ exports.mw = required => {
 
                     return next();
                 } catch (errSession) {
-                    console.log(errSession);
-                    return res.sendStatus(401);
+                    return res.sendStatus(403).json({ msg: 'Token expired' });
                 }
             } else {
                 return res.status(401).json({ msg: 'Token not found' });
