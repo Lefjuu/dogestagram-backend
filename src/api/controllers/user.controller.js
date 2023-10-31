@@ -57,6 +57,32 @@ exports.checkUsernameAvailable = CatchError(async (req, res, next) => {
     });
 });
 
+exports.changePassword = CatchError(async (req, res, next) => {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        return next(
+            new AppError(
+                'Please provide current password, new password and confirm password!',
+                400
+            )
+        );
+    }
+    const data = await userService.changePassword(
+        req.user.id,
+        currentPassword,
+        newPassword,
+        confirmPassword
+    );
+    if (data instanceof AppError) {
+        return next(data);
+    }
+
+    res.status(200).json({
+        status: 'success',
+        message: 'Password updated'
+    });
+});
+
 exports.getUserFollowers = CatchError(async (req, res, next) => {
     const { id } = req.params;
 
@@ -84,48 +110,41 @@ exports.getUserFollowings = CatchError(async (req, res, next) => {
         data: usersArray
     });
 });
-exports.followUser = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { userId } = req.body;
 
-        if (
-            !id ||
-            !validator.isMongoId(id) ||
-            !userId ||
-            !validator.isMongoId(userId)
-        ) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Both of id cannot be empty'
-            };
-        }
-        await UserService.followUser(id, userId);
-        return res.sendStatus(202);
-    } catch (err) {
-        res.status(500).json(err);
+exports.followUser = CatchError(async (req, res, next) => {
+    const { userId } = req.body;
+
+    if (!userId || !validator.isMongoId(userId)) {
+        return next(
+            new AppError('Provide user Id', 400, CodeEnum.ProvideValues)
+        );
     }
-};
+
+    const data = await userService.followUser(req.user.id, userId);
+    if (data instanceof AppError) {
+        return next(data);
+    }
+    res.status(200).json({
+        status: 'success',
+        message: 'User followed'
+    });
+});
 
 exports.unfollowUser = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { userId } = req.body;
+    const { userId } = req.body;
 
-        if (
-            !id ||
-            !validator.isMongoId(id) ||
-            !userId ||
-            !validator.isMongoId(userId)
-        ) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Both of id cannot be empty'
-            };
-        }
-        await UserService.unfollowUser(id, userId);
-        return res.sendStatus(202);
-    } catch (err) {
-        res.status(500).json(err);
+    if (!userId || !validator.isMongoId(userId)) {
+        throw {
+            code: CodeEnum.ProvideValues,
+            message: 'Both of id cannot be empty'
+        };
     }
+    const data = await userService.unfollowUser(req.user.id, userId);
+    if (data instanceof AppError) {
+        return next(data);
+    }
+    res.status(200).json({
+        status: 'success',
+        message: 'User unfollowed'
+    });
 };

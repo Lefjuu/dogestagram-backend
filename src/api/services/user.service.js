@@ -31,7 +31,7 @@ exports.getUser = async _id => {
             );
         return user;
     }
-    throw new AppError('User not found', 403, CodeEnum.UserNotFound);
+    throw new AppError('User not found', 400, CodeEnum.UserNotFound);
 };
 
 exports.checkUsernameAvailable = async username => {
@@ -69,6 +69,25 @@ exports.updateUser = async (id, body) => {
     return updatedData;
 };
 
+exports.changePassword = async (userId, currentPassword, newPassword) => {
+    const user = await UserModel.findById(userId).select('+password');
+
+    if (
+        !user ||
+        !(await user.correctPassword(currentPassword, user.password))
+    ) {
+        throw new AppError('Incorrect password', 400);
+    }
+
+    if (!user) {
+        throw new AppError('User not found', 400);
+    }
+
+    user.password = newPassword;
+    await user.save();
+    return user;
+};
+
 exports.getUserFollowers = async id => {
     const user = await UserModel.findById(id).lean();
     if (!user) {
@@ -86,7 +105,6 @@ exports.getUserFollowers = async id => {
                 usersArray.push(res);
             });
     }
-
     return usersArray;
 };
 
@@ -110,6 +128,53 @@ exports.getUserFollowings = async id => {
     return usersArray;
 };
 
+exports.followUser = async (id, userId) => {
+    const exists = await UserModel.exists({
+        _id: userId,
+        followers: {
+            $in: [id]
+        }
+    }).lean();
+    if (exists) {
+        throw new AppError(
+            'Already followed user',
+            400,
+            CodeEnum.AlreadyFollowed
+        );
+    }
+    const userToFollowExists = await UserModel.exists({
+        _id: id
+    }).lean();
+    console.log(userToFollowExists);
+    if (!userToFollowExists) {
+        throw new AppError(
+            'User to follow not exists',
+            400,
+            CodeEnum.UserNotFound
+        );
+    }
+    await UserModel.findByIdAndUpdate(
+        {
+            _id: userId
+        },
+        {
+            $push: {
+                followers: id
+            }
+        }
+    );
+    await UserModel.findByIdAndUpdate(
+        {
+            _id: id
+        },
+        {
+            $push: {
+                followings: userId
+            }
+        }
+    );
+};
+
 exports.unfollowUser = async (id, userId) => {
     const exists = await UserModel.exists({
         _id: userId,
@@ -118,10 +183,7 @@ exports.unfollowUser = async (id, userId) => {
         }
     }).lean();
     if (exists) {
-        throw {
-            code: CodeEnum.NotFollowed,
-            message: 'User not followed'
-        };
+        throw new AppError('User not followed', 400, CodeEnum.AlreadyFollowed);
     }
     await UserModel.findByIdAndUpdate(
         {

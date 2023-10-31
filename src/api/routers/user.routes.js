@@ -14,20 +14,17 @@ module.exports = app => {
         userController.getUserFollowers
     );
 
-    // app.patch(
-    //     '/api/users/new-password',
-    //     mw(['user']),
-    //     UserController.newPassword
-    // );
-    // app.post('/api/user/follow/:id', mw(['user']), userController.followUser);
-    // app.patch(
-    //     '/api/users/unfollow/:id',
-    //     mw(['user']),
-    //     UserController.unfollowUser
-    // );
-    // app.get(
-    //     '/api/users/:username/followings',
-    //     mw(['user']),
-    //     UserController.getUserFollowings
-    // );
+    app.get(
+        '/api/users/followings/:id',
+        mw(['user']),
+        userController.getUserFollowings
+    );
+
+    app.patch(
+        '/api/users/change-password',
+        mw(['user']),
+        userController.changePassword
+    );
+    app.post('/api/users/follow', mw(['user']), userController.followUser);
+    app.patch('/api/users/unfollow', mw(['user']), userController.unfollowUser);
 };

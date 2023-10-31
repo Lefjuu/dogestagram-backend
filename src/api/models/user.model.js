@@ -62,7 +62,14 @@ UserSchema.plugin(aggregatePaginate);
 
 // Statics
 UserSchema.statics.compare = async function(candidatePassword, password) {
-    return await bcrypt.compareSync(candidatePassword, password);
+    return bcrypt.compare(candidatePassword, password);
+};
+
+UserSchema.methods.correctPassword = async function(
+    candidatePassword,
+    userPassword
+) {
+    return await bcrypt.compare(candidatePassword, userPassword);
 };
 
 // Hooks
