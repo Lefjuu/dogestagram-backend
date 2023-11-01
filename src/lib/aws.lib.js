@@ -2,9 +2,10 @@ const {
     S3Client,
     PutObjectCommand,
     DeleteObjectCommand,
-    HeadBucketCommand
+    HeadBucketCommand,
+    GetObjectCommand
 } = require('@aws-sdk/client-s3');
-const { fromBase64 } = require('base64-arraybuffer');
+const { Buffer } = require('buffer');
 
 const client = new S3Client({
     region: process.env.AWS_BUCKET_REGION,
@@ -14,24 +15,44 @@ const client = new S3Client({
     }
 });
 
-exports.uploadFile = async (file, author) => {
-    const buffer = fromBase64(file.replace(/^data:image\/\w+;base64,/, ''));
-    const type = file.split(';')[0].split('/')[1];
-
-    const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: `${author}.${type}`,
-        Body: buffer,
-        ContentType: `image/${type}`
-    };
-
-    const command = new PutObjectCommand(params);
-
+exports.uploadFile = async (file, fileId) => {
     try {
+        const base64Data = file.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        const type = file.split(';')[0].split('/')[1];
+        const params = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: `${fileId}.${type}`,
+            Body: buffer,
+            ContentType: `image/${type}`
+        };
+
+        const command = new PutObjectCommand(params);
         const data = await client.send(command);
+        console.log(data);
         return data;
     } catch (err) {
         console.error('Error uploading file:', err);
+        throw err;
+    }
+};
+
+exports.getFile = async fileKey => {
+    try {
+        const params = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: fileKey
+        };
+
+        const command = new GetObjectCommand(params);
+        const response = await client.send(command);
+        const body = await response.Body.getReader().read();
+        const fileData = Buffer.from(body.value).toString('base64');
+
+        console.log(fileData);
+        return fileData;
+    } catch (err) {
+        console.error('Error getting file:', err);
         throw err;
     }
 };
