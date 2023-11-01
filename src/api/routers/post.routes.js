@@ -1,24 +1,24 @@
-const PostController = require('../controllers/post.controller.js');
 const { mw } = require('../../services/mw.service.js');
+const { postController } = require('../controllers/index.js');
 
 module.exports = app => {
-    app.get('/api/post', mw(['user']), PostController.getPosts);
-    app.get('/api/post/:id', mw(['user']), PostController.getPost);
-    app.post('/api/post', mw(['user']), PostController.createPost);
-    app.get('/api/post/user/:id', mw(['user']), PostController.getUserPosts);
-    app.delete('/api/post/:id', mw(['user']), PostController.deletePost);
-    app.patch('/api/post/:id', mw(['user']), PostController.updatePost);
-    app.post('/api/post/like/:id', mw(['user']), PostController.likePost);
-    app.patch('/api/post/unlike/:id', mw(['user']), PostController.unlikePost);
-    app.get(
-        '/api/post/timeline/:id',
-        mw(['user']),
-        PostController.getTimelineUser
-    );
-    app.get(
-        '/api/post/explore/:id',
-        mw(['user']),
-        PostController.getExploreUser
-    );
-    app.get('/api/post/:id/liked', mw(['user']), PostController.likedPosts);
+    app.get('/api/posts/user', mw(['user']), postController.getUserPosts);
+    app.get('/api/posts/:id', mw(['user']), postController.getPost);
+    app.post('/api/posts', mw(['user']), postController.createPost);
+    // app.get('/api/posts/user/:id', mw(['user']), PostController.getUserPosts);
+    // app.delete('/api/posts/:id', mw(['user']), PostController.deletePost);
+    // app.patch('/api/posts/:id', mw(['user']), PostController.updatePost);
+    // app.post('/api/posts/like/:id', mw(['user']), PostController.likePost);
+    // app.patch('/api/posts/unlike/:id', mw(['user']), PostController.unlikePost);
+    // app.get(
+    //     '/api/posts/timeline/:id',
+    //     mw(['user']),
+    //     PostController.getTimelineUser
+    // );
+    // app.get(
+    //     '/api/posts/explore/:id',
+    //     mw(['user']),
+    //     PostController.getExploreUser
+    // );
+    // app.get('/api/posts/:id/liked', mw(['user']), PostController.likedPosts);
 };

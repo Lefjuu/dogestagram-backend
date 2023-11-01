@@ -1,22 +1,43 @@
 const { v4: uuidv4 } = require('uuid');
-const UserModel = require('../models/user.model.js');
+const { deleteFile, uploadFile, getFile } = require('../../lib/aws.lib.js');
+const { CodeEnum } = require('../../utils/statusCodes.util.js');
 const PostModel = require('../models/post.model.js');
-const { deleteFile, uploadFile } = require('../../lib/aws.lib.js');
-const CodeEnum = require('../../utils/statusCodes.util.js');
+const { userController } = require('../controllers/index.js');
+const AppError = require('../../utils/errors/AppError.js');
+const { userService } = require('./index.js');
+const { getUserByUsername } = require('./user.service.js');
 
-exports.getPosts = async () => {
-    const posts = await PostModel.find({});
+// id=653e1e0829f408050a8f42bf
+exports.getUserPosts = async query => {
+    let posts;
+    if (query.username) {
+        const user = await getUserByUsername(query.username);
+        if (!user) {
+            throw new AppError('User not found', 400, CodeEnum.UserNotFound);
+        }
+        posts = await PostModel.find(user.id);
+    } else {
+        posts = await PostModel.find(query);
+    }
+    // console.log(posts[0].img === process.env.AWS_URL + `/${posts[3].img}`);
+    // console.log(process.env.AWS_URL + `/${posts[3].img}`);
 
-    // for await (const post of posts) {
-    //         const user = await UserModel.findById(post.author).lean();
-    //         post.author = user.username;
-    //     }
-    await Promise.all(
-        posts.map(async post => {
-            const user = await UserModel.findById(post.author).lean();
-            post.author = user.username;
-        })
-    );
+    // const post = await getFile(posts[3].img + '.png');
+    // console.log(post);
+    // console.log(post);
+    // console.log(post);
+    // console.log(post);
+    posts.sort((a, b) => {
+        if (!a.createdAt) {
+            return 1;
+        }
+        if (!b.createdAt) {
+            return -1;
+        }
+        return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    console.log(posts);
 
     return posts;
 };
@@ -24,9 +45,9 @@ exports.getPosts = async () => {
 exports.getPost = async id => {
     const post = await PostModel.findById(id).lean();
 
-    const user = await UserModel.findById(post.author).lean();
-    post.author = user.username;
-    post.authorImg = user.img;
+    // const user = await UserModel.findById(post.userId).lean();
+    // post.userId = user.username;
+    // post.authorImg = user.img;
     return post;
 };
 
@@ -35,13 +56,18 @@ exports.createPost = async body => {
     const FileId = uuidv4();
     const result = await uploadFile(file, FileId);
 
+    const imgUrl = `${process.env.AWS_URL}/${FileId.replace(
+        /^"(.*)"$/,
+        '$1'
+    )}.png`;
+
     const newPost = await PostModel.create({
-        img: result.Location,
-        author: body.author,
+        img: imgUrl,
+        userId: body.userId,
         description: body.description,
         likes: ['']
-        // comments: ['']
     });
+    console.log(newPost);
     return newPost;
 };
 
@@ -219,23 +245,23 @@ exports.getExploreUser = async id => {
     return updatedPosts;
 };
 
-exports.getUserPosts = async id => {
-    const posts = await PostModel.find({
-        author: id
-    }).lean();
+// exports.getUserPosts = async id => {
+//     const posts = await PostModel.find({
+//         author: id
+//     }).lean();
 
-    posts.sort((a, b) => {
-        if (!a.createdAt) {
-            return 1;
-        }
-        if (!b.createdAt) {
-            return -1;
-        }
-        return new Date(b.createdAt) - new Date(a.createdAt);
-    });
+//     posts.sort((a, b) => {
+//         if (!a.createdAt) {
+//             return 1;
+//         }
+//         if (!b.createdAt) {
+//             return -1;
+//         }
+//         return new Date(b.createdAt) - new Date(a.createdAt);
+//     });
 
-    return posts;
-};
+//     return posts;
+// };
 
 exports.likedPosts = async id => {
     const user = await UserModel.findOne({ _id: id }).lean();

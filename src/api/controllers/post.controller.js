@@ -1,64 +1,76 @@
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
 const validator = require('validator');
-const PostService = require('../services/post.service.js');
-const CodeEnum = require('../../utils/statusCodes.util.js');
+const CatchError = require('../../utils/errors/CatchError.js');
+const { postService } = require('../services/index.js');
+const { CodeEnum } = require('../../utils/statusCodes.util.js');
+const AppError = require('../../utils/errors/AppError.js');
+const { default: mongoose } = require('mongoose');
 
-exports.getPosts = async (req, res) => {
-    try {
-        const posts = await PostService.getPosts();
-        res.status(200).json(posts);
-    } catch (err) {
-        res.status(500).json(err);
+exports.getUserPosts = CatchError(async (req, res, next) => {
+    const { id, username } = req.query;
+
+    if (!id && !username) {
+        return next(
+            new AppError('Provide Id or Username', 400, CodeEnum.ProvideValues)
+        );
     }
-};
 
-exports.getPost = async (req, res) => {
+    let posts;
+    if (id) {
+        if (validator.isMongoId(id)) {
+            posts = await postService.getUserPosts({
+                userId: id
+            });
+        }
+    } else {
+        posts = await postService.getUserPosts({
+            username: username
+        });
+    }
+    console.log(posts);
+
+    if (posts instanceof AppError) {
+        return next(posts);
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: posts
+    });
+});
+
+exports.getPost = CatchError(async (req, res, next) => {
     try {
         const { id } = req.params;
-        if (!id || !validator.isMongoId(id)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Id cannot be empty'
-            };
+        if (!validator.isMongoId(id)) {
+            return next(
+                new AppError('Provide valid id', 400, CodeEnum.ProvideValues)
+            );
         }
 
-        const post = await PostService.getPost(id);
+        const post = await postService.getPost(id);
         res.status(200).json(post);
     } catch (err) {
         res.sendStatus(500);
     }
-};
+});
 
-exports.createPost = async (req, res) => {
-    const { author, img, description } = req.body;
+exports.createPost = CatchError(async (req, res, next) => {
+    const { img, description } = req.body;
 
     try {
-        if (!author || validator.isEmpty(author)) {
-            throw new Error({
-                code: CodeEnum.ProvideValues,
-                message: 'User id cannot be empty'
-            });
+        if (!img || validator.isEmpty(img)) {
+            return next(new AppError('Add Image', 400, CodeEnum.ProvideValues));
         }
 
-        if (!img || validator.isEmpty(img)) {
-            throw new Error({
-                code: CodeEnum.ProvideValues,
-                message: 'User id cannot be empty'
-            });
-        }
-        if (!description || validator.isEmpty(description)) {
-            throw new Error({
-                code: CodeEnum.ProvideValues,
-                message: 'User id cannot be empty'
-            });
-        }
-        const post = await PostService.createPost(req.body);
+        const postBody = { img, description, userId: req.user.id };
+        const post = await postService.createPost(postBody);
 
         res.status(201).json(post);
     } catch (err) {
         res.status(500).json(err);
     }
-};
+});
 
 exports.deletePost = async (req, res) => {
     try {
@@ -183,23 +195,23 @@ exports.getExploreUser = async (req, res) => {
     }
 };
 
-exports.getUserPosts = async (req, res) => {
-    try {
-        const { id } = req.params;
+// exports.getUserPosts = async (req, res) => {
+//     try {
+//         const { id } = req.params;
 
-        if (!id || !validator.isMongoId(id)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Id cannot be empty'
-            };
-        }
+//         if (!id || !validator.isMongoId(id)) {
+//             throw {
+//                 code: CodeEnum.ProvideValues,
+//                 message: 'Id cannot be empty'
+//             };
+//         }
 
-        const posts = await PostService.getUserPosts(id);
-        res.status(200).json(posts);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-};
+//         const posts = await PostService.getUserPosts(id);
+//         res.status(200).json(posts);
+//     } catch (err) {
+//         res.status(500).json(err);
+//     }
+// };
 
 exports.likedPosts = async (req, res) => {
     try {
