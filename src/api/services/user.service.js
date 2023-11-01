@@ -5,23 +5,43 @@ const { CodeEnum } = require('../../utils/statusCodes.util.js');
 const UserModel = require('../models/user.model.js');
 const { v4: uuidv4 } = require('uuid');
 
-exports.getUser = async _id => {
-    const user = await UserModel.aggregate([
-        {
-            $match: {
-                _id: mongoose.Types.ObjectId(_id)
+exports.getUser = async query => {
+    let user;
+    if (query.id) {
+        user = await UserModel.aggregate([
+            {
+                $match: {
+                    _id: mongoose.Types.ObjectId(query.id)
+                }
+            },
+            {
+                $project: {
+                    followersCount: { $size: '$followers' },
+                    followingsCount: { $size: '$followings' },
+                    username: 1,
+                    name: 1,
+                    img: 1
+                }
             }
-        },
-        {
-            $project: {
-                followersCount: { $size: '$followers' },
-                followingsCount: { $size: '$followings' },
-                username: 1,
-                name: 1,
-                img: 1
+        ]);
+    } else if (query.username) {
+        user = await UserModel.aggregate([
+            {
+                $match: {
+                    username: query.username
+                }
+            },
+            {
+                $project: {
+                    followersCount: { $size: '$followers' },
+                    followingsCount: { $size: '$followings' },
+                    username: 1,
+                    name: 1,
+                    img: 1
+                }
             }
-        }
-    ]);
+        ]);
+    }
     if (user) {
         if (user.deleted_at)
             throw new AppError(
@@ -29,7 +49,7 @@ exports.getUser = async _id => {
                 400,
                 CodeEnum.UserBanned
             );
-        return user;
+        return user[0];
     }
     throw new AppError('User not found', 400, CodeEnum.UserNotFound);
 };
@@ -205,4 +225,33 @@ exports.unfollowUser = async (id, userId) => {
             }
         }
     );
+};
+
+exports.getUserByUsername = async username => {
+    const user = await UserModel.aggregate([
+        {
+            $match: {
+                username
+            }
+        },
+        {
+            $project: {
+                followersCount: { $size: '$followers' },
+                followingsCount: { $size: '$followings' },
+                username: 1,
+                name: 1,
+                img: 1
+            }
+        }
+    ]);
+    if (user) {
+        if (user.deleted_at)
+            throw new AppError(
+                'The user has been banned',
+                400,
+                CodeEnum.UserBanned
+            );
+        return user;
+    }
+    throw new AppError('User not found', 400, CodeEnum.UserNotFound);
 };

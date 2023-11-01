@@ -5,13 +5,28 @@ const { userService } = require('../services/index.js');
 const CatchError = require('../../utils/errors/CatchError.js');
 
 exports.getUser = CatchError(async (req, res, next) => {
-    const { id } = req.params;
-    if (!id) {
+    const { id, username } = req.query;
+
+    if (!id && !username) {
         return next(
             new AppError('id cannot be empty', 400, CodeEnum.ProvideValues)
         );
     }
-    const user = await userService.getUser(id);
+
+    let user;
+    if (id) {
+        if (validator.isMongoId(id)) {
+            user = await userService.getUser({ _id: id });
+        }
+    } else {
+        user = await userService.getUser({ username: username });
+    }
+    console.log(user);
+
+    if (user instanceof AppError) {
+        return next(user);
+    }
+
     res.status(200).json({
         status: 'success',
         data: user

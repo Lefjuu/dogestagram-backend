@@ -6,7 +6,7 @@ module.exports = app => {
         '/api/users/check-username-available/:username',
         userController.checkUsernameAvailable
     );
-    app.get('/api/users/:id', mw(['user']), userController.getUser);
+    app.get('/api/users', mw(['user']), userController.getUser);
     app.patch('/api/users', mw(['user']), userController.updateUser);
     app.get(
         '/api/users/followers/:id',

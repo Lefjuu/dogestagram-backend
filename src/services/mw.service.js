@@ -38,7 +38,8 @@ exports.mw = required => {
                 return res.status(401).json({ msg: 'Token not found' });
             }
         } catch (err) {
-            return error(res, err);
+            console.log(err);
+            return res.status(500).json(err);
         }
     };
 };
