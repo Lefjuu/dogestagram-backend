@@ -7,9 +7,9 @@ module.exports = app => {
     app.post('/api/posts', mw(['user']), postController.createPost);
     // app.get('/api/posts/user/:id', mw(['user']), PostController.getUserPosts);
     app.delete('/api/posts/:id', mw(['user']), postController.deletePost);
-    // app.patch('/api/posts/:id', mw(['user']), PostController.updatePost);
-    // app.post('/api/posts/like/:id', mw(['user']), PostController.likePost);
-    // app.patch('/api/posts/unlike/:id', mw(['user']), PostController.unlikePost);
+    app.patch('/api/posts/:id', mw(['user']), postController.updatePost);
+    app.patch('/api/posts/like/:id', mw(['user']), postController.likePost);
+    app.patch('/api/posts/unlike/:id', mw(['user']), postController.unlikePost);
     // app.get(
     //     '/api/posts/timeline/:id',
     //     mw(['user']),

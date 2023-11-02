@@ -102,76 +102,78 @@ exports.deletePost = CatchError(async (req, res, next) => {
     }
 });
 
-exports.updatePost = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { description } = req.body;
+exports.updatePost = CatchError(async (req, res, next) => {
+    const { id } = req.params;
+    const { description } = req.body;
+    const userId = req.user.id;
 
-        if (!id || validator.isEmpty(id)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Post Id cannot be empty'
-            };
-        }
-        if (!description || validator.isEmpty(description)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Description cannot be empty'
-            };
-        }
-        const post = await PostService.updatePost(id, description);
-        res.status(200).json(post);
-    } catch (err) {
-        res.status(500).json(err);
+    if (validator.isEmpty(id)) {
+        return next(
+            new AppError('Post Id cannot be empty', 400, CodeEnum.ProvideValues)
+        );
     }
-};
-
-exports.likePost = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { userId } = req.body;
-
-        if (
-            !id ||
-            !validator.isMongoId(id) ||
-            !userId ||
-            !validator.isMongoId(userId)
-        ) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Post Id cannot be empty'
-            };
-        }
-        await PostService.likePost(id, userId);
-        res.sendStatus(201);
-    } catch (err) {
-        res.status(500).json(err);
+    if (!description || validator.isEmpty(description)) {
+        return next(
+            new AppError(
+                'Description cannot be empty',
+                400,
+                CodeEnum.ProvideValues
+            )
+        );
     }
-};
 
-exports.unlikePost = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { userId } = req.body;
-
-        if (
-            !id ||
-            !validator.isMongoId(id) ||
-            !userId ||
-            !validator.isMongoId(userId)
-        ) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Post Id cannot be empty'
-            };
-        }
-
-        await PostService.unlikePost(id, userId);
-        res.sendStatus(204);
-    } catch (err) {
-        res.status(500).json(err);
+    const updatedPost = await postService.updatePost(id, description, userId);
+    if (updatedPost instanceof AppError) {
+        return next(updatedPost);
     }
-};
+
+    res.status(200).json({
+        status: 'success',
+        data: updatedPost
+    });
+});
+
+exports.likePost = CatchError(async (req, res, next) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    if (!validator.isMongoId(id)) {
+        throw {
+            code: CodeEnum.ProvideValues,
+            message: 'Post Id cannot be empty'
+        };
+    }
+    const data = await postService.likePost(id, userId);
+    if (data instanceof AppError) {
+        return next(data);
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: data
+    });
+});
+
+exports.unlikePost = CatchError(async (req, res, next) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    if (!validator.isMongoId(id)) {
+        throw {
+            code: CodeEnum.ProvideValues,
+            message: 'Post Id cannot be empty'
+        };
+    }
+    const data = await postService.unlikePost(id, userId);
+    if (data instanceof AppError) {
+        return next(data);
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: data
+    });
+});
 
 exports.getTimelineUser = async (req, res) => {
     try {

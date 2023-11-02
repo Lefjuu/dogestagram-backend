@@ -7,6 +7,7 @@ const AppError = require('../../utils/errors/AppError.js');
 const { userService } = require('./index.js');
 const { getUserByUsername } = require('./user.service.js');
 const { AWS_URL } = require('../../config/index.js');
+const UserModel = require('../models/user.model.js');
 
 exports.getUserPosts = async query => {
     let posts;
@@ -75,99 +76,85 @@ exports.deletePost = async (id, userId) => {
     return false;
 };
 
-exports.updatePost = async (id, description) => {
-    const post = await PostModel.findByIdAndUpdate(
+exports.updatePost = async (id, description, userId) => {
+    const post = await PostModel.findById(id);
+
+    if (!post) {
+        throw new AppError('Post not found', 400, CodeEnum.UserNotFound);
+    }
+    if (post.userId.toString() !== userId) {
+        throw new AppError('You are not permitted', 400, CodeEnum.UserNotFound);
+    }
+
+    const updatedPost = await PostModel.findByIdAndUpdate(
         {
             _id: id
         },
         {
             description: description
-        }
+        },
+        { new: true }
     );
 
-    if (post === null) {
-        throw {
-            code: CodeEnum.PostNotExist,
-            message: `Post not exist`
-        };
+    return updatedPost;
+};
+
+exports.likePost = async (id, userId) => {
+    const post = await PostModel.findById({ _id: id });
+
+    if (!post) {
+        throw new AppError('Post not found', 400, CodeEnum.PostNotExist);
     }
+
+    if (post.likes.includes(userId)) {
+        throw new AppError(
+            'User has already liked this post',
+            400,
+            CodeEnum.AlreadyLiked
+        );
+    }
+
+    post.likes.push(userId);
+    await post.save();
+
+    await UserModel.findByIdAndUpdate(
+        { _id: userId },
+        {
+            $push: {
+                liked: id
+            }
+        },
+        { new: true }
+    );
 
     return post;
 };
 
-exports.likePost = async (id, userId) => {
-    await PostModel.findByIdAndUpdate(
-        {
-            _id: id
-        },
-        {
-            $push: {
-                likes: userId
-            }
-        }
-    ).then(res => {
-        if (res === null) {
-            throw {
-                code: CodeEnum.PostNotExist,
-                message: `Post not exist`
-            };
-        }
-    });
-
-    await UserModel.findByIdAndUpdate(
-        {
-            _id: userId
-        },
-        {
-            $push: {
-                liked: id
-            }
-        }
-    ).then(res => {
-        if (res === null) {
-            throw {
-                code: CodeEnum.PostNotExist,
-                message: `User not exist`
-            };
-        }
-    });
-};
-
 exports.unlikePost = async (id, userId) => {
-    await PostModel.findByIdAndUpdate(
-        {
-            _id: id
-        },
-        {
-            $pull: {
-                likes: userId
-            }
-        }
-    ).then(res => {
-        if (res === null) {
-            throw {
-                code: CodeEnum.PostNotExist,
-                message: `User not exist`
-            };
-        }
-    });
+    const post = await PostModel.findById({ _id: id });
+
+    if (!post) {
+        throw new AppError('Post not found', 400, CodeEnum.PostNotExist);
+    }
+
+    if (!post.likes.includes(userId)) {
+        throw new AppError('User not liked this post', 400, CodeEnum.NotLiked);
+    }
+
+    post.likes.pull(userId);
+    await post.save();
+
     await UserModel.findByIdAndUpdate(
-        {
-            _id: userId
-        },
+        { _id: userId },
         {
             $pull: {
                 liked: id
             }
-        }
-    ).then(res => {
-        if (res === null) {
-            throw {
-                code: CodeEnum.PostNotExist,
-                message: `User not exist`
-            };
-        }
-    });
+        },
+        { new: true }
+    );
+
+    return post;
 };
 
 exports.getTimelineUser = async id => {
