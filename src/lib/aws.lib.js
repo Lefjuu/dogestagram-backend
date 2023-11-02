@@ -6,14 +6,30 @@ const {
     GetObjectCommand
 } = require('@aws-sdk/client-s3');
 const { Buffer } = require('buffer');
+const {
+    AWS_BUCKET_REGION,
+    AWS_ACCESS_KEY,
+    AWS_SECRET_KEY,
+    AWS_BUCKET_NAME
+} = require('../config');
 
 const client = new S3Client({
-    region: process.env.AWS_BUCKET_REGION,
+    region: AWS_BUCKET_REGION,
     credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY,
-        secretAccessKey: process.env.AWS_SECRET_KEY
+        accessKeyId: AWS_ACCESS_KEY,
+        secretAccessKey: AWS_SECRET_KEY
     }
 });
+
+function extractUUIDFromURL(url) {
+    const regex = /\/([a-fA-F0-9-]+)\.png$/;
+    const match = url.match(regex);
+    if (match && match[1]) {
+        return `${match[1]}.png`;
+    } else {
+        return null;
+    }
+}
 
 exports.uploadFile = async (file, fileId) => {
     try {
@@ -21,7 +37,7 @@ exports.uploadFile = async (file, fileId) => {
         const buffer = Buffer.from(base64Data, 'base64');
         const type = file.split(';')[0].split('/')[1];
         const params = {
-            Bucket: process.env.AWS_BUCKET_NAME,
+            Bucket: AWS_BUCKET_NAME,
             Key: `${fileId}.${type}`,
             Body: buffer,
             ContentType: `image/${type}`
@@ -29,7 +45,6 @@ exports.uploadFile = async (file, fileId) => {
 
         const command = new PutObjectCommand(params);
         const data = await client.send(command);
-        console.log(data);
         return data;
     } catch (err) {
         console.error('Error uploading file:', err);
@@ -40,7 +55,7 @@ exports.uploadFile = async (file, fileId) => {
 exports.getFile = async fileKey => {
     try {
         const params = {
-            Bucket: process.env.AWS_BUCKET_NAME,
+            Bucket: AWS_BUCKET_NAME,
             Key: fileKey
         };
 
@@ -48,8 +63,6 @@ exports.getFile = async fileKey => {
         const response = await client.send(command);
         const body = await response.Body.getReader().read();
         const fileData = Buffer.from(body.value).toString('base64');
-
-        console.log(fileData);
         return fileData;
     } catch (err) {
         console.error('Error getting file:', err);
@@ -59,9 +72,10 @@ exports.getFile = async fileKey => {
 
 exports.deleteFile = async file => {
     try {
+        const extractedUUID = extractUUIDFromURL(file);
         const params = {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: file
+            Bucket: AWS_BUCKET_NAME,
+            Key: extractedUUID
         };
 
         const command = new DeleteObjectCommand(params);
@@ -75,7 +89,7 @@ exports.deleteFile = async file => {
 exports.checkS3Connection = async () => {
     try {
         const params = {
-            Bucket: process.env.AWS_BUCKET_NAME
+            Bucket: AWS_BUCKET_NAME
         };
 
         const command = new HeadBucketCommand(params);

@@ -38,6 +38,12 @@ exports.EMAIL_PORT = process.env.EMAIL_PORT;
 exports.EMAIL_USERNAME = process.env.EMAIL_USERNAME;
 exports.EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 
+exports.AWS_BUCKET_REGION = process.env.AWS_BUCKET_REGION;
+exports.AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+exports.AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY;
+exports.AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
+exports.AWS_URL = process.env.AWS_URL;
+
 exports.CLIENT_HOSTNAME = process.env.CLIENT_HOSTNAME;
 exports.REDIS_TTL = {
     trimester: 7776000
