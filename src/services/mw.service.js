@@ -1,45 +1,54 @@
 const validator = require('validator');
-const { error } = require('../utils/helper.util.js');
 const { check, renew } = require('../utils/jwt.util.js');
 const AppError = require('../utils/errors/AppError.js');
 const { CodeEnum } = require('../utils/statusCodes.util.js');
 
-exports.mw = required => {
-    return async (req, res, next) => {
-        try {
-            let token = req.headers.authorization;
-            if (token) {
-                try {
-                    token = token.split(' ')[1];
-                    if (!validator.isJWT(token)) throw 'Token is not valid';
-                    req.headers.authorization = `Bearer ${token}`;
-                    const decoded = await check(token);
-                    if (required) {
-                        if ('permissions' in decoded) {
-                            const isAuthorized = required.filter(x =>
-                                decoded.permissions.includes(x)
-                            );
-                            if (isAuthorized.length === 0)
-                                return new AppError(
-                                    'You are not authorized',
-                                    400,
-                                    CodeEnum.Unauthorized
-                                );
-                        }
-                    }
-                    await renew(decoded.key);
-                    req.user = decoded;
+exports.mw = (required = []) => async (req, res, next) => {
+    try {
+        const token = req.headers.authorization;
 
-                    return next();
-                } catch (errSession) {
-                    return res.sendStatus(403).json({ msg: 'Token expired' });
-                }
-            } else {
-                return res.status(401).json({ msg: 'Token not found' });
-            }
-        } catch (err) {
-            console.log(err);
-            return res.status(500).json(err);
+        if (!token) {
+            return res.status(401).json({ msg: 'Token not found' });
         }
-    };
+
+        const tokenParts = token.split(' ');
+
+        if (
+            tokenParts.length !== 2 ||
+            tokenParts[0] !== 'Bearer' ||
+            !validator.isJWT(tokenParts[1])
+        ) {
+            throw new AppError(
+                'Invalid token format',
+                400,
+                CodeEnum.BadRequest
+            );
+        }
+
+        const decoded = await check(tokenParts[1]);
+
+        if (required.length > 0 && 'permissions' in decoded) {
+            const isAuthorized = required.some(permission =>
+                decoded.permissions.includes(permission)
+            );
+            if (!isAuthorized) {
+                throw new AppError(
+                    'You are not authorized',
+                    403,
+                    CodeEnum.Forbidden
+                );
+            }
+        }
+
+        await renew(decoded.key);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ msg: error.message });
+        } else {
+            console.error(error);
+            return res.status(403).json({ msg: 'Token expired in redis' });
+        }
+    }
 };
