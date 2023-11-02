@@ -6,7 +6,7 @@ module.exports = app => {
     app.get('/api/posts/:id', mw(['user']), postController.getPost);
     app.post('/api/posts', mw(['user']), postController.createPost);
     // app.get('/api/posts/user/:id', mw(['user']), PostController.getUserPosts);
-    // app.delete('/api/posts/:id', mw(['user']), PostController.deletePost);
+    app.delete('/api/posts/:id', mw(['user']), postController.deletePost);
     // app.patch('/api/posts/:id', mw(['user']), PostController.updatePost);
     // app.post('/api/posts/like/:id', mw(['user']), PostController.likePost);
     // app.patch('/api/posts/unlike/:id', mw(['user']), PostController.unlikePost);

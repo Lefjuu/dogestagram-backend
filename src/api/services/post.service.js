@@ -6,8 +6,8 @@ const { userController } = require('../controllers/index.js');
 const AppError = require('../../utils/errors/AppError.js');
 const { userService } = require('./index.js');
 const { getUserByUsername } = require('./user.service.js');
+const { AWS_URL } = require('../../config/index.js');
 
-// id=653e1e0829f408050a8f42bf
 exports.getUserPosts = async query => {
     let posts;
     if (query.username) {
@@ -19,14 +19,7 @@ exports.getUserPosts = async query => {
     } else {
         posts = await PostModel.find(query);
     }
-    // console.log(posts[0].img === process.env.AWS_URL + `/${posts[3].img}`);
-    // console.log(process.env.AWS_URL + `/${posts[3].img}`);
 
-    // const post = await getFile(posts[3].img + '.png');
-    // console.log(post);
-    // console.log(post);
-    // console.log(post);
-    // console.log(post);
     posts.sort((a, b) => {
         if (!a.createdAt) {
             return 1;
@@ -36,8 +29,6 @@ exports.getUserPosts = async query => {
         }
         return new Date(b.createdAt) - new Date(a.createdAt);
     });
-
-    console.log(posts);
 
     return posts;
 };
@@ -56,10 +47,7 @@ exports.createPost = async body => {
     const FileId = uuidv4();
     const result = await uploadFile(file, FileId);
 
-    const imgUrl = `${process.env.AWS_URL}/${FileId.replace(
-        /^"(.*)"$/,
-        '$1'
-    )}.png`;
+    const imgUrl = `${AWS_URL}/${FileId.replace(/^"(.*)"$/, '$1')}.png`;
 
     const newPost = await PostModel.create({
         img: imgUrl,
@@ -67,25 +55,24 @@ exports.createPost = async body => {
         description: body.description,
         likes: ['']
     });
-    console.log(newPost);
     return newPost;
 };
 
-exports.deletePost = async id => {
+exports.deletePost = async (id, userId) => {
     const post = await PostModel.findOne({
         _id: id
     }).lean();
     if (post === null) {
-        throw {
-            code: CodeEnum.PostNotExist,
-            message: `post not exist`
-        };
+        throw new AppError('Post not found', 400, CodeEnum.UserNotFound);
     }
-    await PostModel.findOneAndDelete({
-        _id: id
-    }).lean();
-
-    deleteFile(post.img);
+    await deleteFile(post.img);
+    if (post.userId.toString() === userId) {
+        await PostModel.findOneAndDelete({
+            _id: id
+        }).lean();
+        return true;
+    }
+    return false;
 };
 
 exports.updatePost = async (id, description) => {

@@ -27,7 +27,6 @@ exports.getUserPosts = CatchError(async (req, res, next) => {
             username: username
         });
     }
-    console.log(posts);
 
     if (posts instanceof AppError) {
         return next(posts);
@@ -40,55 +39,68 @@ exports.getUserPosts = CatchError(async (req, res, next) => {
 });
 
 exports.getPost = CatchError(async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        if (!validator.isMongoId(id)) {
-            return next(
-                new AppError('Provide valid id', 400, CodeEnum.ProvideValues)
-            );
-        }
-
-        const post = await postService.getPost(id);
-        res.status(200).json(post);
-    } catch (err) {
-        res.sendStatus(500);
+    const { id } = req.params;
+    if (!validator.isMongoId(id)) {
+        return next(
+            new AppError('Provide valid id', 400, CodeEnum.ProvideValues)
+        );
     }
+
+    const post = await postService.getPost(id);
+    if (post instanceof AppError) {
+        return next(post);
+    }
+    res.status(200).json({
+        status: 'success',
+        data: post
+    });
 });
 
 exports.createPost = CatchError(async (req, res, next) => {
     const { img, description } = req.body;
 
-    try {
-        if (!img || validator.isEmpty(img)) {
-            return next(new AppError('Add Image', 400, CodeEnum.ProvideValues));
-        }
-
-        const postBody = { img, description, userId: req.user.id };
-        const post = await postService.createPost(postBody);
-
-        res.status(201).json(post);
-    } catch (err) {
-        res.status(500).json(err);
+    if (!img || validator.isEmpty(img)) {
+        return next(new AppError('Add Image', 400, CodeEnum.ProvideValues));
     }
+
+    const postBody = { img, description, userId: req.user.id };
+    const post = await postService.createPost(postBody);
+    if (post instanceof AppError) {
+        return next(post);
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: post
+    });
 });
 
-exports.deletePost = async (req, res) => {
-    try {
-        const { id } = req.params;
+exports.deletePost = CatchError(async (req, res, next) => {
+    const { id } = req.params;
+    const userId = req.user.id;
 
-        if (!id || !validator.isMongoId(id)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Id cannot be empty'
-            };
-        }
-
-        await PostService.deletePost(id);
-        res.sendStatus(204);
-    } catch (err) {
-        res.status(500).json(err);
+    if (!validator.isMongoId(id)) {
+        return next(
+            new AppError('Provide valid id', 400, CodeEnum.ProvideValues)
+        );
     }
-};
+
+    const post = await postService.deletePost(id, userId);
+    if (post instanceof AppError) {
+        return next(post);
+    }
+    if (post === true) {
+        res.status(200).json({
+            status: 'success',
+            data: post
+        });
+    } else {
+        res.status(403).json({
+            status: 'failed',
+            data: post
+        });
+    }
+});
 
 exports.updatePost = async (req, res) => {
     try {
