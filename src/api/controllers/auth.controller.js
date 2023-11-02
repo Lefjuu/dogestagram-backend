@@ -95,7 +95,6 @@ exports.login = CatchError(async (req, res, next) => {
 
 exports.verify = CatchError(async (req, res, next) => {
     const data = await authService.verify(req.params.token);
-    console.log(data);
     if (data instanceof AppError) {
         return next(data);
     }

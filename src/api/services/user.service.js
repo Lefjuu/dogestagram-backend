@@ -165,7 +165,6 @@ exports.followUser = async (id, userId) => {
     const userToFollowExists = await UserModel.exists({
         _id: id
     }).lean();
-    console.log(userToFollowExists);
     if (!userToFollowExists) {
         throw new AppError(
             'User to follow not exists',

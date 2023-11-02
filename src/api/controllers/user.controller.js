@@ -21,7 +21,6 @@ exports.getUser = CatchError(async (req, res, next) => {
     } else {
         user = await userService.getUser({ username: username });
     }
-    console.log(user);
 
     if (user instanceof AppError) {
         return next(user);

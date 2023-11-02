@@ -50,5 +50,7 @@ exports.CodeEnum = {
     UserBanned: 863,
     ProvidePassword: 864,
     AlreadyFollowed: 865,
-    NotFollowed: 866
+    NotFollowed: 866,
+    AlreadyLiked: 867,
+    NotLiked: 868
 };
