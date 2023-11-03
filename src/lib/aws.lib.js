@@ -48,7 +48,7 @@ exports.uploadFile = async (file, fileId) => {
         return data;
     } catch (err) {
         console.error('Error uploading file:', err);
-        throw err;
+        return err;
     }
 };
 
@@ -66,7 +66,7 @@ exports.getFile = async fileKey => {
         return fileData;
     } catch (err) {
         console.error('Error getting file:', err);
-        throw err;
+        return err;
     }
 };
 
@@ -82,7 +82,7 @@ exports.deleteFile = async file => {
         await client.send(command);
     } catch (err) {
         console.error('Error deleting file:', err);
-        throw err;
+        return err;
     }
 };
 

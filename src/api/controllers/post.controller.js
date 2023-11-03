@@ -138,10 +138,9 @@ exports.likePost = CatchError(async (req, res, next) => {
     const userId = req.user.id;
 
     if (!validator.isMongoId(id)) {
-        throw {
-            code: CodeEnum.ProvideValues,
-            message: 'Post Id cannot be empty'
-        };
+        return next(
+            new AppError('Post Id cannot be empty', 400, CodeEnum.ProvideValues)
+        );
     }
     const data = await postService.likePost(id, userId);
     if (data instanceof AppError) {
@@ -159,10 +158,9 @@ exports.unlikePost = CatchError(async (req, res, next) => {
     const userId = req.user.id;
 
     if (!validator.isMongoId(id)) {
-        throw {
-            code: CodeEnum.ProvideValues,
-            message: 'Post Id cannot be empty'
-        };
+        return next(
+            new AppError('Post Id cannot be empty', 400, CodeEnum.ProvideValues)
+        );
     }
     const data = await postService.unlikePost(id, userId);
     if (data instanceof AppError) {
@@ -175,72 +173,37 @@ exports.unlikePost = CatchError(async (req, res, next) => {
     });
 });
 
-exports.getTimelineUser = async (req, res) => {
-    try {
-        const { id } = req.params;
+exports.getTimelineUser = CatchError(async (req, res, next) => {
+    const timeline = await postService.getTimelineUser(req.user.id);
+    res.status(200).json({
+        status: 'success',
+        data: timeline
+    });
+});
 
-        if (!id || validator.isEmpty(id)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'User id cannot be empty'
-            };
-        }
-        const timeline = await PostService.getTimelineUser(id);
-        res.status(200).json(timeline);
-    } catch (err) {
-        res.status(500).json(err);
+exports.getExploreUser = CatchError(async (req, res, next) => {
+    const timeline = await postService.getExploreUser(req.user.id);
+    res.status(200).json({
+        status: 'success',
+        data: timeline
+    });
+});
+
+exports.likedPosts = CatchError(async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!validator.isMongoId(id)) {
+        return next(
+            new AppError('Post Id cannot be empty', 400, CodeEnum.ProvideValues)
+        );
     }
-};
 
-exports.getExploreUser = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        if (!id || validator.isEmpty(id)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'User id cannot be empty'
-            };
-        }
-        const posts = await PostService.getExploreUser(id);
-        res.status(200).json(posts);
-    } catch (err) {
-        res.status(500).json(err);
+    const liked = await postService.likedPosts(id);
+    if (liked instanceof AppError) {
+        return next(liked);
     }
-};
-
-// exports.getUserPosts = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-
-//         if (!id || !validator.isMongoId(id)) {
-//             throw {
-//                 code: CodeEnum.ProvideValues,
-//                 message: 'Id cannot be empty'
-//             };
-//         }
-
-//         const posts = await PostService.getUserPosts(id);
-//         res.status(200).json(posts);
-//     } catch (err) {
-//         res.status(500).json(err);
-//     }
-// };
-
-exports.likedPosts = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        if (!id || !validator.isMongoId(id)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Id cannot be empty'
-            };
-        }
-
-        const liked = await PostService.likedPosts(id);
-        res.status(200).json(liked);
-    } catch (err) {
-        res.status(500).json(err);
-    }
-};
+    res.status(200).json({
+        status: 'success',
+        data: liked
+    });
+});

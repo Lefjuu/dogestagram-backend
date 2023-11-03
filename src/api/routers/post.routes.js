@@ -10,15 +10,15 @@ module.exports = app => {
     app.patch('/api/posts/:id', mw(['user']), postController.updatePost);
     app.patch('/api/posts/like/:id', mw(['user']), postController.likePost);
     app.patch('/api/posts/unlike/:id', mw(['user']), postController.unlikePost);
-    // app.get(
-    //     '/api/posts/timeline/:id',
-    //     mw(['user']),
-    //     PostController.getTimelineUser
-    // );
-    // app.get(
-    //     '/api/posts/explore/:id',
-    //     mw(['user']),
-    //     PostController.getExploreUser
-    // );
+    app.get(
+        '/api/posts/timeline/:id',
+        mw(['user']),
+        postController.getTimelineUser
+    );
+    app.get(
+        '/api/posts/explore/:id',
+        mw(['user']),
+        postController.getExploreUser
+    );
     // app.get('/api/posts/:id/liked', mw(['user']), PostController.likedPosts);
 };
