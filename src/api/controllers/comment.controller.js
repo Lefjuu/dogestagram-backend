@@ -1,57 +1,71 @@
 // eslint-disable-next-line import/no-extraneous-dependencies, node/no-extraneous-require
 const validator = require('validator');
 const CodeEnum = require('../../utils/statusCodes.util.js');
-const CommentService = require('../services/comment.service.js');
+const CatchError = require('../../utils/errors/CatchError.js');
+const { commentService } = require('../services/index.js');
+const AppError = require('../../utils/errors/AppError.js');
 
-exports.createComment = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { username, description } = req.body;
+exports.createComment = CatchError(async (req, res, next) => {
+    const userId = req.user.id;
 
-        if (!id || !validator.isMongoId(id)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Id cannot be empty'
-            };
-        }
-
-        if (!username || validator.isEmpty(username)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Username cannot be empty'
-            };
-        }
-
-        if (!description || validator.isEmpty(description)) {
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Description cannot be empty'
-            };
-        }
-
-        await CommentService.createComment(id, username, description);
-
-        res.sendStatus(201);
-    } catch (err) {
-        res.sendStatus(500);
+    if (!validator.isMongoId(req.body.postId)) {
+        return next(
+            new AppError('Post Id cannot be empty', 400, CodeEnum.ProvideValues)
+        );
     }
-};
+    const { description, postId } = req.body;
 
-exports.getComments = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        if (!id || validator.isEmpty(id)) {
-            // eslint-disable-next-line no-throw-literal
-            throw {
-                code: CodeEnum.ProvideValues,
-                message: 'Post id in params cannot be empty'
-            };
-        }
-
-        const post = await CommentService.getComments(req.params.id);
-        res.status(200).json(post);
-    } catch (err) {
-        res.sendStatus(500);
+    if (!description || validator.isEmpty(description)) {
+        return next(
+            new AppError('comment cannot be empty', 400, CodeEnum.ProvideValues)
+        );
     }
-};
+
+    const comment = await commentService.createComment(
+        userId,
+        description,
+        postId
+    );
+    if (comment instanceof AppError) {
+        return next(comment);
+    }
+    res.status(201).json({
+        status: 'success',
+        data: comment
+    });
+});
+
+exports.getComment = CatchError(async (req, res, next) => {
+    const { id } = req.params;
+
+    if (!validator.isMongoId(id)) {
+        return next(new AppError('Invalid id', 400, CodeEnum.ProvideValues));
+    }
+
+    const comment = await commentService.getComment(id);
+    if (comment instanceof AppError) {
+        return next(comment);
+    }
+    res.status(201).json({
+        status: 'success',
+        data: comment
+    });
+});
+
+exports.getCommentsByPostId = CatchError(async (req, res, next) => {
+    const { postId } = req.query;
+
+    if (!validator.isMongoId(postId)) {
+        return next(new AppError('Invalid id', 400, CodeEnum.ProvideValues));
+    }
+
+    const comments = await commentService.getCommentsByPostId(postId);
+
+    if (comments instanceof AppError) {
+        return next(comments);
+    }
+    res.status(201).json({
+        status: 'success',
+        data: comments
+    });
+});

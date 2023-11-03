@@ -1,28 +1,39 @@
 const { hash } = require('bcrypt');
 const CommentModel = require('../models/comment.model.js');
 const PostModel = require('../models/post.model.js');
+const { postService } = require('./index.js');
+const AppError = require('../../utils/errors/AppError.js');
+const { CodeEnum } = require('../../utils/statusCodes.util.js');
 
-exports.getComments = async id => {
+exports.getComment = async id => {
+    return await CommentModel.findById(id).lean();
+};
+
+exports.getCommentsByPostId = async id => {
     const post = await PostModel.findById(id)
         .populate('comments')
         .lean();
+
+    if (!post) {
+        return new AppError('Post not found', 400, CodeEnum.PostNotExist);
+    }
 
     const comment = await CommentModel.find({ post: post._id }).lean();
 
     return [comment];
 };
 
-exports.createComment = async (id, username, description) => {
-    const uniqueString = hash(12);
-    const comment = new CommentModel({
-        _id: uniqueString,
-        post: id,
-        author: username,
+exports.createComment = async (userId, description, postId) => {
+    // const uniqueString = hash(12);
+    console.log(postId);
+    const post = await PostModel.findById(postId);
+    console.log(post);
+    const comment = await CommentModel.create({
+        post: postId,
+        userId: userId,
         description: description
     });
-
-    await comment.save();
-    const postById = await PostModel.findById(id);
-    postById.comments.push(comment._id);
-    await postById.save();
+    post.comments.push(comment._id);
+    await post.save();
+    return comment;
 };

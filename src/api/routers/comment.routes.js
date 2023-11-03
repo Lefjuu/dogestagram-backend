@@ -1,15 +1,12 @@
 const CommentController = require('../controllers/comment.controller.js');
 const { mw } = require('../../services/mw.service.js');
-
+const { commentController } = require('../controllers/index.js');
 module.exports = app => {
-    // app.post(
-    //     '/api/comment/add/:id',
-    //     mw(['user']),
-    //     CommentController.createComment
-    // );
-    // app.get(
-    //     '/api/comment/get/:id',
-    //     mw(['user']),
-    //     CommentController.getComments
-    // );
+    app.post('/api/comments', mw(['user']), commentController.createComment);
+    app.get('/api/comments/:id', mw(['user']), commentController.getComment);
+    app.get(
+        '/api/comments',
+        mw(['user']),
+        commentController.getCommentsByPostId
+    );
 };
